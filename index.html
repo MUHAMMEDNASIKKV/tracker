@@ -144,7 +144,7 @@
             font-size: 1.5rem;
             color: #1f2937;
             text-align: center;
-            margin-bottom: 1rem;
+            margin-bottom: 0.5rem;
         }
         
         .prayer-arabic {
@@ -165,7 +165,7 @@
         
         .prayer-option {
             flex: 1;
-            min-width: 80px;
+            min-width: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -176,18 +176,59 @@
             background: white;
             cursor: pointer;
             transition: all 0.2s ease;
-            font-weight: 500;
+            font-weight: 600;
             font-size: 0.9rem;
         }
         
         .prayer-option:hover {
-            border-color: #059669;
-            background: #f0fdf4;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
         
-        .prayer-option.selected {
+        /* Default border colors based on option type */
+        .prayer-option[data-value="ada'"] {
+            border-color: #10b981;
+        }
+        
+        .prayer-option[data-value="ada'"]:hover {
+            background: #ecfdf5;
+            border-color: #059669;
+        }
+        
+        .prayer-option[data-value="qala'"] {
+            border-color: #3b82f6;
+        }
+        
+        .prayer-option[data-value="qala'"]:hover {
+            background: #eff6ff;
+            border-color: #2563eb;
+        }
+        
+        .prayer-option[data-value="no"] {
+            border-color: #ef4444;
+        }
+        
+        .prayer-option[data-value="no"]:hover {
+            background: #fef2f2;
+            border-color: #dc2626;
+        }
+        
+        /* Selected states */
+        .prayer-option.selected[data-value="ada'"] {
             background: #059669;
             border-color: #059669;
+            color: white;
+        }
+        
+        .prayer-option.selected[data-value="qala'"] {
+            background: #2563eb;
+            border-color: #2563eb;
+            color: white;
+        }
+        
+        .prayer-option.selected[data-value="no"] {
+            background: #dc2626;
+            border-color: #dc2626;
             color: white;
         }
         
@@ -197,6 +238,22 @@
         
         .prayer-option i {
             font-size: 1.25rem;
+        }
+        
+        .prayer-option[data-value="ada'"] i {
+            color: #059669;
+        }
+        
+        .prayer-option[data-value="qala'"] i {
+            color: #3b82f6;
+        }
+        
+        .prayer-option[data-value="no"] i {
+            color: #ef4444;
+        }
+        
+        .prayer-option.selected i {
+            color: white !important;
         }
         
         /* Success Message */
@@ -280,7 +337,7 @@
             }
             
             .prayer-option {
-                min-width: 70px;
+                min-width: 80px;
                 padding: 0.5rem 0.75rem;
                 font-size: 0.8rem;
             }
