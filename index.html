@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>Prayer tracking</title>
+    <title>Tharbiyya - Prayer Tracker | حاسبوا أنفسكم قبل أن تحاسبوا</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -256,20 +256,6 @@
             color: white !important;
         }
         
-        /* Success Message */
-        .success-message {
-            background: #f0fdf4;
-            border: 1px solid #86efac;
-            color: #166534;
-            padding: 1rem;
-            border-radius: 16px;
-            margin-bottom: 1.5rem;
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            font-weight: 500;
-        }
-        
         /* Error Message */
         .error-message {
             background: #fef2f2;
@@ -452,20 +438,10 @@
         </div>
         
         <form id="loginForm">
-            <!-- Name Dropdown -->
-            <div class="mb-5">
-                <label for="studentName" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-user mr-2 text-emerald-600"></i>Student Name
-                </label>
-                <select id="studentName" name="studentName" required class="form-select">
-                    <option value="" disabled selected>-- Select Student Name --</option>
-                </select>
-            </div>
-            
-            <!-- Class Dropdown -->
+            <!-- Class Dropdown - FIRST -->
             <div class="mb-5">
                 <label for="studentClass" class="block text-sm font-medium text-gray-700 mb-2">
-                    <i class="fas fa-graduation-cap mr-2 text-emerald-600"></i>Class
+                    <i class="fas fa-graduation-cap mr-2 text-emerald-600"></i>Select Class
                 </label>
                 <select id="studentClass" name="studentClass" required class="form-select">
                     <option value="" disabled selected>-- Select Class --</option>
@@ -482,7 +458,17 @@
                 </select>
             </div>
             
-            <!-- Password -->
+            <!-- Name Dropdown - SECOND -->
+            <div class="mb-5">
+                <label for="studentName" class="block text-sm font-medium text-gray-700 mb-2">
+                    <i class="fas fa-user mr-2 text-emerald-600"></i>Select Student Name
+                </label>
+                <select id="studentName" name="studentName" required class="form-select">
+                    <option value="" disabled selected>-- First Select Class --</option>
+                </select>
+            </div>
+            
+            <!-- Password - THIRD -->
             <div class="mb-6">
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-lock mr-2 text-emerald-600"></i>Password
@@ -504,7 +490,7 @@
         </form>
         
         <div class="mt-6 text-center text-xs text-gray-400">
-            <p>© 2024 Tharbiyya. All rights reserved.</p>
+            <p>© 2024 Tracker. All rights reserved.</p>
         </div>
     </div>
     
