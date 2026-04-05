@@ -18,7 +18,7 @@ const USER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCL
 class GoogleSheetsAPI {
     constructor() {
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
-        this.apiUrl = "https://script.google.com/macros/s/AKfycbxyskFl5im3KbMks256GgowmoqfsNtyA10OF5vbEZ1V2K0dZ55V4204qAxNFtunmvQx/exec";
+        this.apiUrl = "https://script.google.com/macros/s/AKfycbxxxxx/exec";
     }
 
     async addPrayerRecord(sheetName, rowData) {
@@ -315,10 +315,6 @@ function logout() {
     document.getElementById('loginForm').reset();
     resetPrayerForm();
     
-    // Hide success/error messages
-    document.getElementById('formSuccess').classList.add('hidden');
-    document.getElementById('formError').classList.add('hidden');
-    
     // Show login page
     document.getElementById('dashboardPage').classList.add('hidden');
     document.getElementById('loginPage').classList.remove('hidden');
@@ -382,6 +378,31 @@ function resetPrayerForm() {
     submitBtn.innerHTML = '<i class="fas fa-save"></i> Submit Today\'s Prayers';
 }
 
+// Custom Alert Popup Function
+function showAlertPopup(message) {
+    // Remove any existing alert
+    const existingAlert = document.querySelector('.custom-alert');
+    if (existingAlert) {
+        existingAlert.remove();
+    }
+    
+    // Create alert popup
+    const alertDiv = document.createElement('div');
+    alertDiv.className = 'custom-alert';
+    alertDiv.innerHTML = `
+        <div class="custom-alert-content">
+            <div class="custom-alert-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="custom-alert-title">Success!</div>
+            <div class="custom-alert-message">${message}</div>
+            <button class="custom-alert-btn" onclick="this.closest('.custom-alert').remove()">OK</button>
+        </div>
+    `;
+    
+    document.body.appendChild(alertDiv);
+}
+
 async function checkTodaySubmission() {
     try {
         const result = await api.checkExistingRecord(currentClassSheet, currentDate, currentUser.name);
@@ -420,8 +441,6 @@ async function checkTodaySubmission() {
                 const option = container?.querySelector(`[data-value="${data.isha}"]`);
                 if (option) option.click();
             }
-            
-            showFormSuccess('Your previous submission has been loaded. You can update it below.');
         }
     } catch (error) {
         console.error('Error checking existing submission:', error);
@@ -430,9 +449,6 @@ async function checkTodaySubmission() {
 
 async function submitPrayerForm(event) {
     event.preventDefault();
-    
-    // Hide previous messages
-    hideFormMessages();
     
     // Get all prayer values in order: subh, zuhr, asr, magrib, isha
     const subh = document.getElementById('subh').value;
@@ -443,7 +459,7 @@ async function submitPrayerForm(event) {
     
     // Validate all prayers are selected
     if (!subh || !zuhr || !asr || !magrib || !isha) {
-        showFormError('Please select status for all 5 prayers');
+        alert('Please select status for all 5 prayers');
         return;
     }
     
@@ -466,7 +482,8 @@ async function submitPrayerForm(event) {
         const result = await api.addPrayerRecord(currentClassSheet, rowData);
         
         if (result && result.success) {
-            showFormSuccess('Your prayer data has been submitted successfully!');
+            // Show custom alert popup
+            showAlertPopup('Submitted Successfully!');
             
             // Reset the form to empty state for new submission
             resetPrayerForm();
@@ -475,39 +492,12 @@ async function submitPrayerForm(event) {
         }
     } catch (error) {
         console.error('Error submitting form:', error);
-        showFormError('Submission failed. Please try again.');
+        alert('Submission failed. Please try again.');
     } finally {
         // Restore button state
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
     }
-}
-
-function showFormSuccess(message) {
-    const successDiv = document.getElementById('formSuccess');
-    successDiv.querySelector('span').textContent = message;
-    successDiv.classList.remove('hidden');
-    
-    // Auto hide after 5 seconds
-    setTimeout(() => {
-        successDiv.classList.add('hidden');
-    }, 5000);
-}
-
-function showFormError(message) {
-    const errorDiv = document.getElementById('formError');
-    errorDiv.querySelector('span').textContent = message;
-    errorDiv.classList.remove('hidden');
-    
-    // Auto hide after 5 seconds
-    setTimeout(() => {
-        errorDiv.classList.add('hidden');
-    }, 5000);
-}
-
-function hideFormMessages() {
-    document.getElementById('formSuccess').classList.add('hidden');
-    document.getElementById('formError').classList.add('hidden');
 }
 
 // =============================
