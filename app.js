@@ -17,7 +17,7 @@ const USER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCL
 class GoogleSheetsAPI {
     constructor() {
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
-        this.apiUrl = "https://script.google.com/macros/s/AKfycbxxxxx/exec";
+        this.apiUrl = "https://script.google.com/macros/s/AKfycbxZO8eyxUY6-yGQo1EsEIiXXTsRsmBduZyIhH_yuNoCgGrINeF2BHuCj5gZw5tVnXSO/exec";
     }
 
     async addPrayerRecord(sheetName, rowData) {
