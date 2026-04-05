@@ -237,6 +237,8 @@
             border-radius: 40px;
             font-size: 0.8rem;
             color: #4b5563;
+            display: inline-block;
+            margin-bottom: 1rem;
         }
         
         /* Responsive */
@@ -357,8 +359,9 @@
     <script>
         // ============================================
         // THARBIYYA - Ranking System
-        // Points: Ada' = 3, Qala' = 2, No = -1
-        // Real-time rankings (updates daily)
+        // Points are already in Google Sheet (3, 2, -1)
+        // Daily Total = Sum of 5 prayers
+        // Rankings update in real-time
         // ============================================
         
         // CSV URLs for each class
@@ -375,14 +378,7 @@
             10: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=820085037&single=true&output=csv"
         };
         
-        // Points system
-        const POINTS = {
-            "ada'": 3,
-            "qala'": 2,
-            "no": -1
-        };
-        
-        // Prayer columns
+        // Prayer columns (points are already in these columns)
         const PRAYER_COLUMNS = ["Subh", "Zuhr", "Asr", "Magrib", "Isha"];
         
         // Current page state
@@ -447,20 +443,18 @@
         
         // ============================================
         // 📊 Calculate Daily Points (Sum of 5 prayers)
+        // Points are already numeric in the sheet
         // ============================================
         function calculateDailyPoints(record) {
             let dailyTotal = 0;
             
             for (const prayer of PRAYER_COLUMNS) {
                 const value = record[prayer];
-                if (value) {
-                    const lowerValue = value.toLowerCase();
-                    if (lowerValue === "ada'" || lowerValue === "ada") {
-                        dailyTotal += 3;
-                    } else if (lowerValue === "qala'" || lowerValue === "qala") {
-                        dailyTotal += 2;
-                    } else if (lowerValue === "no") {
-                        dailyTotal += -1;
+                if (value && value !== '') {
+                    // Convert to number (points are already 3, 2, or -1 in the sheet)
+                    const points = parseFloat(value);
+                    if (!isNaN(points)) {
+                        dailyTotal += points;
                     }
                 }
             }
@@ -684,7 +678,7 @@
                                 <i class="fas fa-sync-alt"></i> Refresh
                             </button>
                         </div>
-                        <div class="date-badge" style="margin-bottom: 1rem;">
+                        <div class="date-badge">
                             <i class="fas fa-calendar-alt mr-1"></i> ${weeklyData.startDate} - ${weeklyData.endDate}
                         </div>
                         <div class="empty-state">
@@ -747,7 +741,7 @@
                             <i class="fas fa-sync-alt"></i> Refresh
                         </button>
                     </div>
-                    <div class="date-badge" style="margin-bottom: 1rem;">
+                    <div class="date-badge">
                         <i class="fas fa-calendar-alt mr-1"></i> ${weeklyData.startDate} - ${weeklyData.endDate}
                     </div>
                     ${statsHtml}
@@ -767,8 +761,8 @@
                         </table>
                     </div>
                     <div class="points-legend">
-                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = +3 points</span>
-                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = +2 points</span>
+                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = 3 points</span>
+                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = 2 points</span>
                         <span class="legend-item"><span class="legend-color no"></span> No = -1 point</span>
                         <span class="legend-item"><i class="fas fa-calculator"></i> Daily Total = Sum of 5 prayers</span>
                     </div>
@@ -791,7 +785,7 @@
                                 <i class="fas fa-sync-alt"></i> Refresh
                             </button>
                         </div>
-                        <div class="date-badge" style="margin-bottom: 1rem;">
+                        <div class="date-badge">
                             <i class="fas fa-calendar-alt mr-1"></i> ${monthlyData.month} ${monthlyData.year}
                         </div>
                         <div class="empty-state">
@@ -854,7 +848,7 @@
                             <i class="fas fa-sync-alt"></i> Refresh
                         </button>
                     </div>
-                    <div class="date-badge" style="margin-bottom: 1rem;">
+                    <div class="date-badge">
                         <i class="fas fa-calendar-alt mr-1"></i> ${monthlyData.startDate} - ${monthlyData.endDate}
                     </div>
                     ${statsHtml}
@@ -874,8 +868,8 @@
                         </table>
                     </div>
                     <div class="points-legend">
-                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = +3 points</span>
-                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = +2 points</span>
+                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = 3 points</span>
+                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = 2 points</span>
                         <span class="legend-item"><span class="legend-color no"></span> No = -1 point</span>
                         <span class="legend-item"><i class="fas fa-calculator"></i> Daily Total = Sum of 5 prayers</span>
                     </div>
@@ -974,8 +968,8 @@
                         </table>
                     </div>
                     <div class="points-legend">
-                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = +3 points</span>
-                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = +2 points</span>
+                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = 3 points</span>
+                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = 2 points</span>
                         <span class="legend-item"><span class="legend-color no"></span> No = -1 point</span>
                         <span class="legend-item"><i class="fas fa-calculator"></i> Daily Total = Sum of 5 prayers</span>
                     </div>
@@ -1096,8 +1090,8 @@
         });
         
         console.log('%c🌙 Tharbiyya - Student Ranking System 🌙', 'color: #059669; font-size: 16px; font-weight: bold;');
-        console.log('%cPoints: Adā\' = +3 | Qaḍā\' = +2 | No = -1 (per prayer)', 'color: #1f2937; font-size: 12px;');
-        console.log('%cDaily Total = Sum of all 5 prayers | Rankings update in real-time', 'color: #1f2937; font-size: 12px;');
+        console.log('%cPoints are read directly from Google Sheet (3, 2, -1)', 'color: #1f2937; font-size: 12px;');
+        console.log('%cDaily Total = Sum of 5 prayers | Rankings update in real-time', 'color: #1f2937; font-size: 12px;');
     </script>
 </body>
 </html>
