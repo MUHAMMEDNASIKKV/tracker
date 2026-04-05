@@ -185,10 +185,7 @@ async function loadStudentNames() {
     window.allUsers = users; // Store globally for filtering
     
     const nameSelect = document.getElementById('studentName');
-    nameSelect.innerHTML = '<option value="" disabled selected>-- Select Student Name --</option>';
-    
-    // Initially show all names
-    populateNameDropdown(users);
+    nameSelect.innerHTML = '<option value="" disabled selected>-- First Select Class --</option>';
 }
 
 function populateNameDropdown(users) {
@@ -214,14 +211,34 @@ function populateNameDropdown(users) {
 function filterNamesByClass() {
     const selectedClass = document.getElementById('studentClass').value;
     const nameSelect = document.getElementById('studentName');
+    const passwordInput = document.getElementById('password');
+    
+    // Clear password field when class changes
+    passwordInput.value = '';
     
     if (!selectedClass) {
-        populateNameDropdown(window.allUsers || []);
+        nameSelect.innerHTML = '<option value="" disabled selected>-- First Select Class --</option>';
+        nameSelect.disabled = false;
         return;
     }
     
     const filteredUsers = (window.allUsers || []).filter(user => user.class === selectedClass);
-    populateNameDropdown(filteredUsers);
+    
+    if (filteredUsers.length === 0) {
+        nameSelect.innerHTML = '<option value="" disabled selected>-- No students found in this class --</option>';
+        nameSelect.disabled = false;
+    } else {
+        nameSelect.innerHTML = '<option value="" disabled selected>-- Select Student Name --</option>';
+        filteredUsers.forEach(user => {
+            const option = document.createElement('option');
+            option.value = user.name;
+            option.textContent = `${user.name}`;
+            option.dataset.class = user.class;
+            option.dataset.password = user.password;
+            nameSelect.appendChild(option);
+        });
+        nameSelect.disabled = false;
+    }
 }
 
 async function login(event) {
@@ -235,8 +252,18 @@ async function login(event) {
     // Hide previous error
     hideLoginError();
     
-    if (!studentName || !studentClass || !password) {
-        showLoginError('Please fill in all fields');
+    if (!studentClass) {
+        showLoginError('Please select a class');
+        return;
+    }
+    
+    if (!studentName) {
+        showLoginError('Please select a student name');
+        return;
+    }
+    
+    if (!password) {
+        showLoginError('Please enter your password');
         return;
     }
     
@@ -314,6 +341,10 @@ function logout() {
     // Reset forms
     document.getElementById('loginForm').reset();
     resetPrayerForm();
+    
+    // Reset name dropdown to initial state
+    const nameSelect = document.getElementById('studentName');
+    nameSelect.innerHTML = '<option value="" disabled selected>-- First Select Class --</option>';
     
     // Show login page
     document.getElementById('dashboardPage').classList.add('hidden');
