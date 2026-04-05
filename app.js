@@ -17,7 +17,7 @@ const USER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCL
 class GoogleSheetsAPI {
     constructor() {
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
-        this.apiUrl = "https://script.google.com/macros/s/AKfycbxZO8eyxUY6-yGQo1EsEIiXXTsRsmBduZyIhH_yuNoCgGrINeF2BHuCj5gZw5tVnXSO/exec";
+        this.apiUrl = "https://script.google.com/macros/s/AKfycbwwAgCskuQ747a1GAL3eII-BsyoNJrssdHd6xQh4TlcZCTYKH8lGKawwi9NCbT7W_ay/exec";
     }
 
     async addPrayerRecord(sheetName, rowData) {
@@ -40,9 +40,9 @@ class GoogleSheetsAPI {
         }
     }
 
-    async checkExistingRecord(sheetName, date) {
+    async checkExistingRecord(sheetName, date, name) {
         try {
-            const response = await fetch(`${this.apiUrl}?action=getRecord&sheet=${encodeURIComponent(sheetName)}&date=${encodeURIComponent(date)}`, {
+            const response = await fetch(`${this.apiUrl}?action=getRecord&sheet=${encodeURIComponent(sheetName)}&date=${encodeURIComponent(date)}&name=${encodeURIComponent(name)}`, {
                 method: 'GET',
                 headers: { 'Accept': 'application/json' }
             });
@@ -383,7 +383,7 @@ function resetPrayerForm() {
 
 async function checkTodaySubmission() {
     try {
-        const result = await api.checkExistingRecord(currentClassSheet, currentDate);
+        const result = await api.checkExistingRecord(currentClassSheet, currentDate, currentUser.name);
         
         if (result && result.success && result.data) {
             // Load existing data
@@ -458,8 +458,8 @@ async function submitPrayerForm(event) {
         const dateStr = now.toISOString().split('T')[0];
         const timeStr = now.toLocaleTimeString('en-GB');
         
-        // Prepare row data: date, time, zuhr, asr, magrib, isha, subh
-        const rowData = [dateStr, timeStr, zuhr, asr, magrib, isha, subh];
+        // Prepare row data: date, time, name, class, zuhr, asr, magrib, isha, subh
+        const rowData = [dateStr, timeStr, currentUser.name, currentUser.class, zuhr, asr, magrib, isha, subh];
         
         // Add record to sheet
         const result = await api.addPrayerRecord(currentClassSheet, rowData);
