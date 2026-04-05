@@ -13,6 +13,20 @@ let currentDate = null;
 // Google Sheets CSV URL for user credentials
 const USER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=0&single=true&output=csv";
 
+// Class-specific sheet URLs for checking existing submissions
+const CLASS_URLS = {
+    1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=489329760&single=true&output=csv",
+    2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=428928738&single=true&output=csv",
+    3: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1221669068&single=true&output=csv",
+    4: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=217652018&single=true&output=csv",
+    5: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1691881671&single=true&output=csv",
+    6: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1246984609&single=true&output=csv",
+    7: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=469514472&single=true&output=csv",
+    8: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=272645470&single=true&output=csv",
+    9: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1743514473&single=true&output=csv",
+    10: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=820085037&single=true&output=csv"
+};
+
 // =============================
 // 📊 Google Sheets API Configuration
 // =============================
@@ -38,23 +52,6 @@ class GoogleSheetsAPI {
             return result;
         } catch (error) {
             console.error('Error adding record:', error);
-            return { error: error.message };
-        }
-    }
-
-    async checkExistingRecord(sheetName, date, name) {
-        try {
-            const response = await fetch(`${this.apiUrl}?action=getRecord&sheet=${encodeURIComponent(sheetName)}&date=${encodeURIComponent(date)}&name=${encodeURIComponent(name)}`, {
-                method: 'GET',
-                headers: { 'Accept': 'application/json' }
-            });
-            
-            if (!response.ok) throw new Error(`HTTP ${response.status}`);
-            
-            const data = await response.json();
-            return data;
-        } catch (error) {
-            console.error('Error checking existing record:', error);
             return { error: error.message };
         }
     }
@@ -150,6 +147,77 @@ async function loadUsersFromCSV() {
 }
 
 // =============================
+// 🔍 Check if student already submitted today
+// =============================
+async function hasStudentSubmittedToday(studentClass, studentName, date) {
+    try {
+        // Get the class-specific CSV URL
+        const classUrl = CLASS_URLS[parseInt(studentClass)];
+        if (!classUrl) {
+            console.error('No URL found for class:', studentClass);
+            return false;
+        }
+        
+        const response = await fetch(classUrl);
+        const csvText = await response.text();
+        
+        // Parse CSV
+        const rows = csvText.split('\n');
+        if (rows.length < 2) return false;
+        
+        // Get headers from first row
+        const headers = rows[0].split(',');
+        
+        // Find column indices
+        const dateIndex = headers.findIndex(h => h.toLowerCase().trim() === 'date');
+        const nameIndex = headers.findIndex(h => h.toLowerCase().trim() === 'name');
+        
+        if (dateIndex === -1 || nameIndex === -1) {
+            console.error('CSV headers not found. Expected: date, name');
+            return false;
+        }
+        
+        // Check each row for matching date and name
+        for (let i = 1; i < rows.length; i++) {
+            if (rows[i].trim() === '') continue;
+            
+            // Parse CSV line
+            let row = rows[i];
+            let values = [];
+            let inQuote = false;
+            let currentValue = '';
+            
+            for (let char of row) {
+                if (char === '"') {
+                    inQuote = !inQuote;
+                } else if (char === ',' && !inQuote) {
+                    values.push(currentValue.trim());
+                    currentValue = '';
+                } else {
+                    currentValue += char;
+                }
+            }
+            values.push(currentValue.trim());
+            
+            // Remove quotes from values
+            values = values.map(v => v.replace(/^"|"$/g, ''));
+            
+            const recordDate = values[dateIndex];
+            const recordName = values[nameIndex];
+            
+            if (recordDate === date && recordName === studentName) {
+                return true; // Already submitted today
+            }
+        }
+        
+        return false; // No submission found
+    } catch (error) {
+        console.error('Error checking submission status:', error);
+        return false;
+    }
+}
+
+// =============================
 // 🔑 Login Functions
 // =============================
 
@@ -187,26 +255,6 @@ async function loadStudentNames() {
     
     const nameSelect = document.getElementById('studentName');
     nameSelect.innerHTML = '<option value="" disabled selected>-- First Select Class --</option>';
-}
-
-function populateNameDropdown(users) {
-    const nameSelect = document.getElementById('studentName');
-    const currentValue = nameSelect.value;
-    
-    nameSelect.innerHTML = '<option value="" disabled selected>-- Select Student Name --</option>';
-    
-    users.forEach(user => {
-        const option = document.createElement('option');
-        option.value = user.name;
-        option.textContent = `${user.name}`;
-        option.dataset.class = user.class;
-        option.dataset.password = user.password;
-        nameSelect.appendChild(option);
-    });
-    
-    if (currentValue && [...nameSelect.options].some(opt => opt.value === currentValue)) {
-        nameSelect.value = currentValue;
-    }
 }
 
 function filterNamesByClass() {
@@ -288,6 +336,16 @@ async function login(event) {
     submitBtn.disabled = true;
     
     try {
+        // Check if student already submitted today
+        const alreadySubmitted = await hasStudentSubmittedToday(studentClass, studentName, currentDate);
+        
+        if (alreadySubmitted) {
+            showLoginError(`You have already submitted your prayer status for today (${new Date().toLocaleDateString()}). You can only submit once per day.`);
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+            return;
+        }
+        
         // Login successful
         currentUser = {
             name: studentName,
@@ -311,9 +369,6 @@ async function login(event) {
         
         // Clear password field
         document.getElementById('password').value = '';
-        
-        // Check if already submitted for today
-        await checkTodaySubmission();
         
     } catch (error) {
         console.error('Login error:', error);
@@ -411,8 +466,8 @@ function resetPrayerForm() {
     submitBtn.innerHTML = '<i class="fas fa-save"></i> Submit Today\'s Prayers';
 }
 
-// Custom Alert Popup Function
-function showAlertPopup(message) {
+// Custom Alert Popup with auto-logout after OK button click
+function showSuccessAlertWithLogout(message, onComplete) {
     // Remove any existing alert
     const existingAlert = document.querySelector('.custom-alert');
     if (existingAlert) {
@@ -427,47 +482,22 @@ function showAlertPopup(message) {
             <div class="custom-alert-icon">
                 <i class="fas fa-check-circle"></i>
             </div>
-            <div class="custom-alert-title">Success!</div>
+            <div class="custom-alert-title">Successfully Submitted!</div>
             <div class="custom-alert-message">${message}</div>
-            <button class="custom-alert-btn" onclick="this.closest('.custom-alert').remove()">OK</button>
+            <button class="custom-alert-btn" id="customAlertOkBtn">OK</button>
         </div>
     `;
     
     document.body.appendChild(alertDiv);
-}
-
-async function checkTodaySubmission() {
-    try {
-        const result = await api.checkExistingRecord(currentClassSheet, currentDate, currentUser.name);
-        
-        if (result && result.success && result.data) {
-            // Load existing data
-            const data = result.data;
-            
-            // Map prayer values (data from sheet should be 2, 1, or 0)
-            const prayerMapping = {
-                subh: data.subh,
-                zuhr: data.zuhr,
-                asr: data.asr,
-                magrib: data.magrib,
-                isha: data.isha
-            };
-            
-            // Set prayer values
-            for (const [prayer, value] of Object.entries(prayerMapping)) {
-                if (value !== undefined && value !== null && value !== '') {
-                    const container = document.querySelector(`[data-prayer="${prayer}"]`);
-                    const option = container?.querySelector(`[data-value="${value}"]`);
-                    if (option) {
-                        option.click();
-                        console.log(`Loaded ${prayer}: ${value}`);
-                    }
-                }
-            }
+    
+    // Add event listener to OK button
+    const okBtn = document.getElementById('customAlertOkBtn');
+    okBtn.addEventListener('click', function() {
+        alertDiv.remove();
+        if (onComplete) {
+            onComplete();
         }
-    } catch (error) {
-        console.error('Error checking existing submission:', error);
-    }
+    });
 }
 
 async function submitPrayerForm(event) {
@@ -528,24 +558,65 @@ async function submitPrayerForm(event) {
         const result = await api.addPrayerRecord(currentClassSheet, rowData);
         
         if (result && result.success) {
-            // Show custom alert popup with submission details
+            // Get prayer status texts
             const subhText = getPrayerStatusText(subh);
             const zuhrText = getPrayerStatusText(zuhr);
             const asrText = getPrayerStatusText(asr);
             const magribText = getPrayerStatusText(magrib);
             const ishaText = getPrayerStatusText(isha);
             
-            showAlertPopup(`Submitted Successfully!\n\nSubh: ${subhText}\nZuhr: ${zuhrText}\nAsr: ${asrText}\nMagrib: ${magribText}\nIsha: ${ishaText}`);
+            const message = `Your prayer status has been recorded.\n\n📅 Date: ${new Date().toLocaleDateString()}\n\nSubh: ${subhText}\nZuhr: ${zuhrText}\nAsr: ${asrText}\nMagrib: ${magribText}\nIsha: ${ishaText}\n\nYou will now be logged out.`;
             
-            // Reset the form to empty state for new submission
-            resetPrayerForm();
+            // Show success popup and logout after OK
+            showSuccessAlertWithLogout(message, function() {
+                // Clear any stored user data
+                currentUser = null;
+                currentClassSheet = null;
+                
+                // Reset forms
+                document.getElementById('loginForm').reset();
+                resetPrayerForm();
+                
+                // Reset name dropdown to initial state
+                const nameSelect = document.getElementById('studentName');
+                nameSelect.innerHTML = '<option value="" disabled selected>-- First Select Class --</option>';
+                
+                // Reset class dropdown
+                const classSelect = document.getElementById('studentClass');
+                classSelect.value = '';
+                
+                // Show login page
+                document.getElementById('dashboardPage').classList.add('hidden');
+                document.getElementById('loginPage').classList.remove('hidden');
+                
+                // Show a temporary message that they cannot login again today
+                const tempMsg = document.createElement('div');
+                tempMsg.className = 'error-message';
+                tempMsg.style.marginTop = '1rem';
+                tempMsg.style.marginBottom = '0';
+                tempMsg.innerHTML = `<i class="fas fa-info-circle"></i><span>You have submitted today's prayer status. You can submit again tomorrow.</span>`;
+                
+                const loginContainer = document.querySelector('.login-container');
+                const existingMsg = loginContainer.querySelector('.temp-info-message');
+                if (existingMsg) existingMsg.remove();
+                
+                tempMsg.classList.add('temp-info-message');
+                loginContainer.appendChild(tempMsg);
+                
+                // Remove the message after 5 seconds
+                setTimeout(() => {
+                    if (tempMsg.parentNode) {
+                        tempMsg.remove();
+                    }
+                }, 5000);
+            });
         } else {
             throw new Error(result?.error || 'Failed to submit data');
         }
     } catch (error) {
         console.error('Error submitting form:', error);
         alert('Submission failed. Please try again.');
-    } finally {
+        
         // Restore button state
         submitBtn.innerHTML = originalText;
         submitBtn.disabled = false;
@@ -556,11 +627,11 @@ async function submitPrayerForm(event) {
 function getPrayerStatusText(value) {
     switch(value) {
         case '2':
-            return 'Adā\' (Prayed on time)';
+            return '✅ Adā\' (Prayed on time)';
         case '1':
-            return 'Qaḍā\' (Made up later)';
+            return '🕐 Qaḍā\' (Made up later)';
         case '0':
-            return 'Not prayed';
+            return '❌ Not prayed';
         default:
             return 'Unknown';
     }
@@ -588,3 +659,4 @@ document.addEventListener("keydown", function(e) {
 console.log('%c🌙 Tharbiyya - 5 Daily Prayers Tracker 🌙', 'color: #059669; font-size: 16px; font-weight: bold;');
 console.log('%cPrayer Values: Adā\' = 2, Qaḍā\' = 1, No = 0', 'color: #1f2937; font-size: 12px;');
 console.log('%cPrayer Order: Subh (Fajr) → Zuhr → Asr → Magrib → Isha', 'color: #1f2937; font-size: 12px;');
+console.log('%c⚠️ Students can only submit ONCE per day!', 'color: #dc2626; font-size: 12px; font-weight: bold;');
