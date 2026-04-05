@@ -279,6 +279,29 @@
             background: #fee2e2;
             color: #991b1b;
         }
+        
+        /* Daily Breakdown */
+        .daily-breakdown {
+            font-size: 0.7rem;
+            color: #6b7280;
+            margin-top: 0.25rem;
+        }
+        
+        .points-breakdown {
+            font-size: 0.7rem;
+        }
+        
+        .text-green {
+            color: #059669;
+        }
+        
+        .text-blue {
+            color: #3b82f6;
+        }
+        
+        .text-red {
+            color: #ef4444;
+        }
     </style>
 </head>
 <body>
@@ -337,6 +360,7 @@
         // ============================================
         // THARBIYYA - Ranking System
         // Points: Ada' = 3, Qala' = 2, No = -1
+        // Daily total = sum of all 5 prayers
         // ============================================
         
         // CSV URLs for each class
@@ -360,7 +384,7 @@
             "no": -1
         };
         
-        // Prayer columns (order: Subh, Zuhr, Asr, Magrib, Isha)
+        // Prayer columns in order
         const PRAYER_COLUMNS = ["Subh", "Zuhr", "Asr", "Magrib", "Isha"];
         
         // Current page state
@@ -423,84 +447,88 @@
         }
         
         // ============================================
-        // 📊 Calculate Points for a Single Record
+        // 📊 Calculate Points for a Single Day (All 5 Prayers)
         // ============================================
-        function calculateRecordPoints(record) {
-            let totalPoints = 0;
-            let breakdown = {};
+        function calculateDailyPoints(record) {
+            let dailyTotal = 0;
+            const prayerPoints = {};
             
             for (const prayer of PRAYER_COLUMNS) {
                 const value = record[prayer];
-                if (value && POINTS[value]) {
-                    totalPoints += POINTS[value];
-                    breakdown[prayer] = POINTS[value];
-                } else if (value && value.toLowerCase) {
+                let points = 0;
+                
+                if (value) {
                     const lowerValue = value.toLowerCase();
                     if (lowerValue === "ada'" || lowerValue === "ada") {
-                        totalPoints += 3;
-                        breakdown[prayer] = 3;
+                        points = 3;
                     } else if (lowerValue === "qala'" || lowerValue === "qala") {
-                        totalPoints += 2;
-                        breakdown[prayer] = 2;
+                        points = 2;
                     } else if (lowerValue === "no") {
-                        totalPoints += -1;
-                        breakdown[prayer] = -1;
+                        points = -1;
                     }
                 }
+                
+                prayerPoints[prayer] = points;
+                dailyTotal += points;
             }
             
-            return { total: totalPoints, breakdown };
+            return {
+                total: dailyTotal,
+                breakdown: prayerPoints
+            };
         }
         
         // ============================================
-        // 📊 Calculate Student Total Points
+        // 📊 Calculate Student Total Points (Sum of all daily points)
         // ============================================
         function calculateStudentPoints(records) {
-            const studentPoints = {};
+            const studentData = {};
             
             for (const record of records) {
                 const name = record.Name || record.name;
                 if (!name) continue;
                 
                 const date = record.Date;
-                const points = calculateRecordPoints(record);
+                const dailyPoints = calculateDailyPoints(record);
                 
-                if (!studentPoints[name]) {
-                    studentPoints[name] = {
+                if (!studentData[name]) {
+                    studentData[name] = {
                         name: name,
                         totalPoints: 0,
                         dailyRecords: [],
                         adaCount: 0,
                         qalaCount: 0,
-                        noCount: 0
+                        noCount: 0,
+                        daysCount: 0
                     };
                 }
                 
-                studentPoints[name].totalPoints += points.total;
-                studentPoints[name].dailyRecords.push({
+                studentData[name].totalPoints += dailyPoints.total;
+                studentData[name].dailyRecords.push({
                     date: date,
-                    points: points.total,
-                    breakdown: points.breakdown
+                    points: dailyPoints.total,
+                    breakdown: dailyPoints.breakdown
                 });
+                studentData[name].daysCount++;
                 
-                // Count prayer statuses
+                // Count prayer statuses across all prayers
                 for (const prayer of PRAYER_COLUMNS) {
                     const value = record[prayer];
                     if (value) {
                         const lowerValue = value.toLowerCase();
                         if (lowerValue === "ada'" || lowerValue === "ada") {
-                            studentPoints[name].adaCount++;
+                            studentData[name].adaCount++;
                         } else if (lowerValue === "qala'" || lowerValue === "qala") {
-                            studentPoints[name].qalaCount++;
+                            studentData[name].qalaCount++;
                         } else if (lowerValue === "no") {
-                            studentPoints[name].noCount++;
+                            studentData[name].noCount++;
                         }
                     }
                 }
             }
             
             // Convert to array and sort by total points (descending)
-            const studentArray = Object.values(studentPoints);
+            const studentArray = Object.values(studentData);
             studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
             
             // Add rank
@@ -574,14 +602,14 @@
                 }
             }
             
-            // Calculate points for each student
+            // Calculate points for each student (sum of daily points)
             const studentPoints = {};
             
             for (const record of weeklyRecords) {
                 const name = record.Name || record.name;
                 if (!name) continue;
                 
-                const points = calculateRecordPoints(record);
+                const dailyPoints = calculateDailyPoints(record);
                 
                 if (!studentPoints[name]) {
                     studentPoints[name] = {
@@ -591,12 +619,18 @@
                         adaCount: 0,
                         qalaCount: 0,
                         noCount: 0,
-                        daysActive: new Set()
+                        daysActive: new Set(),
+                        dailyBreakdown: []
                     };
                 }
                 
-                studentPoints[name].totalPoints += points.total;
+                studentPoints[name].totalPoints += dailyPoints.total;
                 studentPoints[name].daysActive.add(record.Date);
+                studentPoints[name].dailyBreakdown.push({
+                    date: record.Date,
+                    points: dailyPoints.total,
+                    breakdown: dailyPoints.breakdown
+                });
                 
                 // Count prayer statuses
                 for (const prayer of PRAYER_COLUMNS) {
@@ -670,7 +704,7 @@
                 const name = record.Name || record.name;
                 if (!name) continue;
                 
-                const points = calculateRecordPoints(record);
+                const dailyPoints = calculateDailyPoints(record);
                 
                 if (!studentPoints[name]) {
                     studentPoints[name] = {
@@ -680,12 +714,18 @@
                         adaCount: 0,
                         qalaCount: 0,
                         noCount: 0,
-                        daysActive: new Set()
+                        daysActive: new Set(),
+                        dailyBreakdown: []
                     };
                 }
                 
-                studentPoints[name].totalPoints += points.total;
+                studentPoints[name].totalPoints += dailyPoints.total;
                 studentPoints[name].daysActive.add(record.Date);
+                studentPoints[name].dailyBreakdown.push({
+                    date: record.Date,
+                    points: dailyPoints.total,
+                    breakdown: dailyPoints.breakdown
+                });
                 
                 // Count prayer statuses
                 for (const prayer of PRAYER_COLUMNS) {
@@ -727,7 +767,7 @@
         }
         
         // ============================================
-        // 📊 Get Class Rankings
+        // 📊 Get Class Rankings (All Time)
         // ============================================
         function getClassRankings(classData, className) {
             const studentPoints = calculateStudentPoints(classData);
@@ -787,11 +827,14 @@
             
             // Rankings table
             let tableRows = '';
-            weeklyData.rankings.forEach((student, index) => {
+            weeklyData.rankings.forEach((student) => {
                 let rankClass = '';
                 if (student.rank === 1) rankClass = 'rank-1';
                 else if (student.rank === 2) rankClass = 'rank-2';
                 else if (student.rank === 3) rankClass = 'rank-3';
+                
+                // Calculate average per day
+                const avgPerDay = (student.totalPoints / student.daysActive).toFixed(1);
                 
                 tableRows += `
                     <tr>
@@ -803,7 +846,7 @@
                             <div class="text-xs text-gray-500">Class ${student.class}</div>
                         </td>
                         <td class="points-cell">${student.totalPoints} pts</td>
-                        <td class="text-sm text-gray-500">${student.daysActive}/7 days</td>
+                        <td class="text-sm text-gray-500">${student.daysActive}/7 days<br><span class="text-xs">(avg ${avgPerDay}/day)</span></td>
                         <td>
                             <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
                             <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
@@ -831,15 +874,18 @@
                                 <tr>
                                     <th>Rank</th>
                                     <th>Student</th>
-                                    <th>Points</th>
+                                    <th>Total Points</th>
                                     <th>Active Days</th>
-                                    <th>Prayers</th>
+                                    <th>Prayer Stats</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${tableRows}
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-400 text-center">
+                        <i class="fas fa-info-circle"></i> Points: Adā' = +3 | Qaḍā' = +2 | No = -1 (per prayer)
                     </div>
                 </div>
             `;
@@ -885,11 +931,13 @@
             
             // Rankings table (all students for monthly)
             let tableRows = '';
-            monthlyData.rankings.forEach((student, index) => {
+            monthlyData.rankings.forEach((student) => {
                 let rankClass = '';
                 if (student.rank === 1) rankClass = 'rank-1';
                 else if (student.rank === 2) rankClass = 'rank-2';
                 else if (student.rank === 3) rankClass = 'rank-3';
+                
+                const avgPerDay = (student.totalPoints / student.daysActive).toFixed(1);
                 
                 tableRows += `
                     <tr>
@@ -901,7 +949,7 @@
                             <div class="text-xs text-gray-500">Class ${student.class}</div>
                         </td>
                         <td class="points-cell">${student.totalPoints} pts</td>
-                        <td class="text-sm text-gray-500">${student.daysActive} days</td>
+                        <td class="text-sm text-gray-500">${student.daysActive} days<br><span class="text-xs">(avg ${avgPerDay}/day)</span></td>
                         <td>
                             <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
                             <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
@@ -929,15 +977,18 @@
                                 <tr>
                                     <th>Rank</th>
                                     <th>Student</th>
-                                    <th>Points</th>
+                                    <th>Total Points</th>
                                     <th>Active Days</th>
-                                    <th>Prayers</th>
+                                    <th>Prayer Stats</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 ${tableRows}
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-400 text-center">
+                        <i class="fas fa-info-circle"></i> Points: Adā' = +3 | Qaḍā' = +2 | No = -1 (per prayer)
                     </div>
                 </div>
             `;
@@ -983,11 +1034,13 @@
             
             // Rankings table
             let tableRows = '';
-            classRankings.rankings.forEach((student, index) => {
+            classRankings.rankings.forEach((student) => {
                 let rankClass = '';
                 if (student.rank === 1) rankClass = 'rank-1';
                 else if (student.rank === 2) rankClass = 'rank-2';
                 else if (student.rank === 3) rankClass = 'rank-3';
+                
+                const avgPerDay = (student.totalPoints / student.daysCount).toFixed(1);
                 
                 tableRows += `
                     <tr>
@@ -998,6 +1051,7 @@
                             <div class="font-medium">${student.name}</div>
                         </td>
                         <td class="points-cell">${student.totalPoints} pts</td>
+                        <td class="text-sm text-gray-500">${student.daysCount} days<br><span class="text-xs">(avg ${avgPerDay}/day)</span></td>
                         <td>
                             <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
                             <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
@@ -1012,10 +1066,10 @@
                     <div class="ranking-header">
                         <div class="ranking-title">
                             <i class="fas fa-graduation-cap"></i>
-                            Class ${classNum} Rankings
+                            Class ${classNum} Rankings (All Time)
                         </div>
                         <div class="date-filter">
-                            <span class="text-sm text-gray-500">All Time</span>
+                            <span class="text-sm text-gray-500">Total Points from All Submissions</span>
                         </div>
                     </div>
                     ${statsHtml}
@@ -1026,6 +1080,7 @@
                                     <th>Rank</th>
                                     <th>Student</th>
                                     <th>Total Points</th>
+                                    <th>Active Days</th>
                                     <th>Prayer Stats</th>
                                 </tr>
                             </thead>
@@ -1033,6 +1088,10 @@
                                 ${tableRows}
                             </tbody>
                         </table>
+                    </div>
+                    <div class="mt-4 text-xs text-gray-400 text-center">
+                        <i class="fas fa-info-circle"></i> Points: Adā' = +3 | Qaḍā' = +2 | No = -1 (per prayer)
+                        <br>Daily Total = Sum of all 5 prayers
                     </div>
                 </div>
             `;
@@ -1093,7 +1152,8 @@
         });
         
         console.log('%c🌙 Tharbiyya - Student Ranking System 🌙', 'color: #059669; font-size: 16px; font-weight: bold;');
-        console.log('%cPoints: Adā\' = +3 | Qaḍā\' = +2 | No = -1', 'color: #1f2937; font-size: 12px;');
+        console.log('%cPoints: Adā\' = +3 | Qaḍā\' = +2 | No = -1 (per prayer)', 'color: #1f2937; font-size: 12px;');
+        console.log('%cDaily Total = Sum of all 5 prayers', 'color: #1f2937; font-size: 12px;');
     </script>
 </body>
 </html>
