@@ -1,6 +1,7 @@
 // ============================================
 // THARBIYYA - Prayer Tracker
 // 5 Daily Prayers Tracker
+// Order: Subh, Zuhr, Asr, Magrib, Isha
 // ============================================
 
 // 🌐 Global Variables
@@ -17,7 +18,7 @@ const USER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCL
 class GoogleSheetsAPI {
     constructor() {
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
-        this.apiUrl = "https://script.google.com/macros/s/AKfycbwwAgCskuQ747a1GAL3eII-BsyoNJrssdHd6xQh4TlcZCTYKH8lGKawwi9NCbT7W_ay/exec";
+        this.apiUrl = "https://script.google.com/macros/s/AKfycbxyskFl5im3KbMks256GgowmoqfsNtyA10OF5vbEZ1V2K0dZ55V4204qAxNFtunmvQx/exec";
     }
 
     async addPrayerRecord(sheetName, rowData) {
@@ -389,7 +390,13 @@ async function checkTodaySubmission() {
             // Load existing data
             const data = result.data;
             
-            // Set prayer values
+            // Set prayer values in order: subh, zuhr, asr, magrib, isha
+            if (data.subh) {
+                const container = document.querySelector('[data-prayer="subh"]');
+                const option = container?.querySelector(`[data-value="${data.subh}"]`);
+                if (option) option.click();
+            }
+            
             if (data.zuhr) {
                 const container = document.querySelector('[data-prayer="zuhr"]');
                 const option = container?.querySelector(`[data-value="${data.zuhr}"]`);
@@ -414,12 +421,6 @@ async function checkTodaySubmission() {
                 if (option) option.click();
             }
             
-            if (data.subh) {
-                const container = document.querySelector('[data-prayer="subh"]');
-                const option = container?.querySelector(`[data-value="${data.subh}"]`);
-                if (option) option.click();
-            }
-            
             showFormSuccess('Your previous submission has been loaded. You can update it below.');
         }
     } catch (error) {
@@ -433,15 +434,15 @@ async function submitPrayerForm(event) {
     // Hide previous messages
     hideFormMessages();
     
-    // Get all prayer values
+    // Get all prayer values in order: subh, zuhr, asr, magrib, isha
+    const subh = document.getElementById('subh').value;
     const zuhr = document.getElementById('zuhr').value;
     const asr = document.getElementById('asr').value;
     const magrib = document.getElementById('magrib').value;
     const isha = document.getElementById('isha').value;
-    const subh = document.getElementById('subh').value;
     
     // Validate all prayers are selected
-    if (!zuhr || !asr || !magrib || !isha || !subh) {
+    if (!subh || !zuhr || !asr || !magrib || !isha) {
         showFormError('Please select status for all 5 prayers');
         return;
     }
@@ -458,8 +459,8 @@ async function submitPrayerForm(event) {
         const dateStr = now.toISOString().split('T')[0];
         const timeStr = now.toLocaleTimeString('en-GB');
         
-        // Prepare row data: date, time, name, class, zuhr, asr, magrib, isha, subh
-        const rowData = [dateStr, timeStr, currentUser.name, currentUser.class, zuhr, asr, magrib, isha, subh];
+        // Prepare row data: date, time, name, class, subh, zuhr, asr, magrib, isha
+        const rowData = [dateStr, timeStr, currentUser.name, currentUser.class, subh, zuhr, asr, magrib, isha];
         
         // Add record to sheet
         const result = await api.addPrayerRecord(currentClassSheet, rowData);
@@ -467,7 +468,8 @@ async function submitPrayerForm(event) {
         if (result && result.success) {
             showFormSuccess('Your prayer data has been submitted successfully!');
             
-            // Keep the form as is (don't reset for easy editing)
+            // Reset the form to empty state for new submission
+            resetPrayerForm();
         } else {
             throw new Error(result?.error || 'Failed to submit data');
         }
@@ -528,4 +530,4 @@ document.addEventListener("keydown", function(e) {
 
 // Console welcome message
 console.log('%c🌙 Tharbiyya - 5 Daily Prayers Tracker 🌙', 'color: #059669; font-size: 16px; font-weight: bold;');
-console.log('%cTrack your Fajr, Zuhr, Asr, Magrib, and Isha prayers daily', 'color: #1f2937; font-size: 12px;');
+console.log('%cPrayer Order: Subh (Fajr) → Zuhr → Asr → Magrib → Isha', 'color: #1f2937; font-size: 12px;');
