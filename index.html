@@ -475,7 +475,28 @@
         <!-- Prayer Form -->
         <form id="prayerForm">
             <div class="prayers-container">
-                <!-- Zuhr Prayer -->
+                <!-- Subh (Fajr) Prayer - First -->
+                <div class="prayer-card">
+                    <div class="prayer-title">Subh (Fajr)</div>
+                    <div class="prayer-arabic">صلاة الفجر</div>
+                    <div class="prayer-options" data-prayer="subh">
+                        <button type="button" class="prayer-option" data-value="ada'">
+                            <i class="fas fa-check-circle"></i>
+                            <span>Adā'</span>
+                        </button>
+                        <button type="button" class="prayer-option" data-value="qala'">
+                            <i class="fas fa-clock"></i>
+                            <span>Qaḍā'</span>
+                        </button>
+                        <button type="button" class="prayer-option" data-value="no">
+                            <i class="fas fa-times-circle"></i>
+                            <span>No</span>
+                        </button>
+                    </div>
+                    <input type="hidden" name="subh" id="subh" required>
+                </div>
+                
+                <!-- Zuhr Prayer - Second -->
                 <div class="prayer-card">
                     <div class="prayer-title">Zuhr</div>
                     <div class="prayer-arabic">صلاة الظهر</div>
@@ -496,7 +517,7 @@
                     <input type="hidden" name="zuhr" id="zuhr" required>
                 </div>
                 
-                <!-- Asr Prayer -->
+                <!-- Asr Prayer - Third -->
                 <div class="prayer-card">
                     <div class="prayer-title">Asr</div>
                     <div class="prayer-arabic">صلاة العصر</div>
@@ -517,7 +538,7 @@
                     <input type="hidden" name="asr" id="asr" required>
                 </div>
                 
-                <!-- Magrib Prayer -->
+                <!-- Magrib Prayer - Fourth -->
                 <div class="prayer-card">
                     <div class="prayer-title">Magrib</div>
                     <div class="prayer-arabic">صلاة المغرب</div>
@@ -538,7 +559,7 @@
                     <input type="hidden" name="magrib" id="magrib" required>
                 </div>
                 
-                <!-- Isha Prayer -->
+                <!-- Isha Prayer - Fifth -->
                 <div class="prayer-card">
                     <div class="prayer-title">Isha</div>
                     <div class="prayer-arabic">صلاة العشاء</div>
@@ -557,27 +578,6 @@
                         </button>
                     </div>
                     <input type="hidden" name="isha" id="isha" required>
-                </div>
-                
-                <!-- Subh (Fajr) Prayer -->
-                <div class="prayer-card">
-                    <div class="prayer-title">Subh (Fajr)</div>
-                    <div class="prayer-arabic">صلاة الفجر</div>
-                    <div class="prayer-options" data-prayer="subh">
-                        <button type="button" class="prayer-option" data-value="ada'">
-                            <i class="fas fa-check-circle"></i>
-                            <span>Adā'</span>
-                        </button>
-                        <button type="button" class="prayer-option" data-value="qala'">
-                            <i class="fas fa-clock"></i>
-                            <span>Qaḍā'</span>
-                        </button>
-                        <button type="button" class="prayer-option" data-value="no">
-                            <i class="fas fa-times-circle"></i>
-                            <span>No</span>
-                        </button>
-                    </div>
-                    <input type="hidden" name="subh" id="subh" required>
                 </div>
             </div>
             
