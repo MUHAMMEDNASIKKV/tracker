@@ -11,7 +11,7 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    <!-- Google Fonts - Arabic Support -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
@@ -25,10 +25,6 @@
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
             min-height: 100vh;
-        }
-        
-        .arabic-text {
-            font-family: 'Amiri', serif;
         }
         
         /* Navigation */
@@ -77,7 +73,7 @@
         
         /* Main Container */
         .main-container {
-            max-width: 1400px;
+            max-width: 1200px;
             margin: 0 auto;
             padding: 1.5rem;
         }
@@ -116,18 +112,18 @@
             font-size: 1.75rem;
         }
         
-        .date-filter {
-            display: flex;
-            gap: 0.5rem;
-            align-items: center;
-            flex-wrap: wrap;
+        .refresh-btn {
+            background: #f3f4f6;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
         }
         
-        .date-input {
-            padding: 0.5rem 0.75rem;
-            border: 1px solid #e5e7eb;
-            border-radius: 12px;
-            font-size: 0.85rem;
+        .refresh-btn:hover {
+            background: #e5e7eb;
         }
         
         /* Table Styles */
@@ -176,6 +172,7 @@
         .points-cell {
             font-weight: 700;
             color: #059669;
+            font-size: 1.1rem;
         }
         
         /* Loading Spinner */
@@ -206,31 +203,10 @@
             color: #9ca3af;
         }
         
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-container {
-                padding: 1rem;
-            }
-            
-            .ranking-card {
-                padding: 1rem;
-            }
-            
-            .ranking-table th,
-            .ranking-table td {
-                padding: 0.75rem 0.5rem;
-                font-size: 0.8rem;
-            }
-            
-            .ranking-title {
-                font-size: 1.2rem;
-            }
-        }
-        
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
@@ -254,60 +230,82 @@
             margin-top: 0.25rem;
         }
         
-        /* Badge */
-        .badge {
+        /* Date Range Badge */
+        .date-badge {
+            background: #f3f4f6;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .ranking-card {
+                padding: 1rem;
+            }
+            
+            .ranking-table th,
+            .ranking-table td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .ranking-title {
+                font-size: 1.2rem;
+            }
+            
+            .points-cell {
+                font-size: 1rem;
+            }
+        }
+        
+        /* Points Legend */
+        .points-legend {
+            background: #f9fafb;
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            margin-top: 1rem;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1.5rem;
+            font-size: 0.75rem;
+        }
+        
+        .legend-item {
             display: inline-flex;
             align-items: center;
-            gap: 0.25rem;
-            padding: 0.25rem 0.5rem;
-            border-radius: 40px;
-            font-size: 0.7rem;
-            font-weight: 600;
+            gap: 0.5rem;
         }
         
-        .badge-ada {
-            background: #d1fae5;
-            color: #065f46;
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
         }
         
-        .badge-qala {
-            background: #dbeafe;
-            color: #1e40af;
+        .legend-color.ada {
+            background: #059669;
         }
         
-        .badge-no {
-            background: #fee2e2;
-            color: #991b1b;
+        .legend-color.qala {
+            background: #3b82f6;
         }
         
-        /* Daily Breakdown */
-        .daily-breakdown {
-            font-size: 0.7rem;
-            color: #6b7280;
-            margin-top: 0.25rem;
-        }
-        
-        .points-breakdown {
-            font-size: 0.7rem;
-        }
-        
-        .text-green {
-            color: #059669;
-        }
-        
-        .text-blue {
-            color: #3b82f6;
-        }
-        
-        .text-red {
-            color: #ef4444;
+        .legend-color.no {
+            background: #ef4444;
         }
     </style>
 </head>
 <body>
     <!-- Navigation -->
     <div class="nav-container">
-        <div class="max-w-[1400px] mx-auto">
+        <div class="max-w-[1200px] mx-auto">
             <div class="nav-links" id="navLinks">
                 <button class="nav-btn active" data-page="weekly">
                     <i class="fas fa-calendar-week mr-2"></i>Weekly Rankings
@@ -360,7 +358,7 @@
         // ============================================
         // THARBIYYA - Ranking System
         // Points: Ada' = 3, Qala' = 2, No = -1
-        // Daily total = sum of all 5 prayers
+        // Real-time rankings (updates daily)
         // ============================================
         
         // CSV URLs for each class
@@ -384,12 +382,13 @@
             "no": -1
         };
         
-        // Prayer columns in order
+        // Prayer columns
         const PRAYER_COLUMNS = ["Subh", "Zuhr", "Asr", "Magrib", "Isha"];
         
         // Current page state
         let currentPage = "weekly";
         let cachedData = {};
+        let isLoading = false;
         
         // ============================================
         // 📥 Fetch and Parse CSV
@@ -447,88 +446,54 @@
         }
         
         // ============================================
-        // 📊 Calculate Points for a Single Day (All 5 Prayers)
+        // 📊 Calculate Daily Points (Sum of 5 prayers)
         // ============================================
         function calculateDailyPoints(record) {
             let dailyTotal = 0;
-            const prayerPoints = {};
             
             for (const prayer of PRAYER_COLUMNS) {
                 const value = record[prayer];
-                let points = 0;
-                
                 if (value) {
                     const lowerValue = value.toLowerCase();
                     if (lowerValue === "ada'" || lowerValue === "ada") {
-                        points = 3;
+                        dailyTotal += 3;
                     } else if (lowerValue === "qala'" || lowerValue === "qala") {
-                        points = 2;
+                        dailyTotal += 2;
                     } else if (lowerValue === "no") {
-                        points = -1;
+                        dailyTotal += -1;
                     }
                 }
-                
-                prayerPoints[prayer] = points;
-                dailyTotal += points;
             }
             
-            return {
-                total: dailyTotal,
-                breakdown: prayerPoints
-            };
+            return dailyTotal;
         }
         
         // ============================================
-        // 📊 Calculate Student Total Points (Sum of all daily points)
+        // 📊 Calculate Student Total Points (All Time)
         // ============================================
         function calculateStudentPoints(records) {
-            const studentData = {};
+            const studentPoints = {};
             
             for (const record of records) {
                 const name = record.Name || record.name;
                 if (!name) continue;
                 
-                const date = record.Date;
                 const dailyPoints = calculateDailyPoints(record);
                 
-                if (!studentData[name]) {
-                    studentData[name] = {
+                if (!studentPoints[name]) {
+                    studentPoints[name] = {
                         name: name,
                         totalPoints: 0,
-                        dailyRecords: [],
-                        adaCount: 0,
-                        qalaCount: 0,
-                        noCount: 0,
                         daysCount: 0
                     };
                 }
                 
-                studentData[name].totalPoints += dailyPoints.total;
-                studentData[name].dailyRecords.push({
-                    date: date,
-                    points: dailyPoints.total,
-                    breakdown: dailyPoints.breakdown
-                });
-                studentData[name].daysCount++;
-                
-                // Count prayer statuses across all prayers
-                for (const prayer of PRAYER_COLUMNS) {
-                    const value = record[prayer];
-                    if (value) {
-                        const lowerValue = value.toLowerCase();
-                        if (lowerValue === "ada'" || lowerValue === "ada") {
-                            studentData[name].adaCount++;
-                        } else if (lowerValue === "qala'" || lowerValue === "qala") {
-                            studentData[name].qalaCount++;
-                        } else if (lowerValue === "no") {
-                            studentData[name].noCount++;
-                        }
-                    }
-                }
+                studentPoints[name].totalPoints += dailyPoints;
+                studentPoints[name].daysCount++;
             }
             
-            // Convert to array and sort by total points (descending)
-            const studentArray = Object.values(studentData);
+            // Convert to array and sort
+            const studentArray = Object.values(studentPoints);
             studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
             
             // Add rank
@@ -540,45 +505,10 @@
         }
         
         // ============================================
-        // 📊 Filter Records by Date Range
+        // 📊 Get Weekly Rankings (Last 7 days - real-time)
         // ============================================
-        function filterRecordsByDateRange(records, startDate, endDate) {
-            if (!startDate && !endDate) return records;
-            
-            return records.filter(record => {
-                const recordDate = record.Date;
-                if (!recordDate) return true;
-                
-                if (startDate && recordDate < startDate) return false;
-                if (endDate && recordDate > endDate) return false;
-                return true;
-            });
-        }
-        
-        // ============================================
-        // 📥 Load All Class Data
-        // ============================================
-        async function loadAllClassData() {
-            const allData = {};
-            
-            for (let i = 1; i <= 10; i++) {
-                const url = CLASS_URLS[i];
-                if (url) {
-                    const data = await fetchCSV(url);
-                    allData[i] = data;
-                }
-            }
-            
-            cachedData = allData;
-            return allData;
-        }
-        
-        // ============================================
-        // 📊 Get Weekly Rankings (All Classes Combined)
-        // ============================================
-        function getWeeklyRankings(allData, customEndDate = null) {
-            // Get current date or custom date
-            const today = customEndDate ? new Date(customEndDate) : new Date();
+        function getWeeklyRankings(allData) {
+            const today = new Date();
             const endDate = today.toISOString().split('T')[0];
             
             // Calculate start date (7 days ago)
@@ -602,7 +532,7 @@
                 }
             }
             
-            // Calculate points for each student (sum of daily points)
+            // Calculate points for each student
             const studentPoints = {};
             
             for (const record of weeklyRecords) {
@@ -616,43 +546,19 @@
                         name: name,
                         class: record.class,
                         totalPoints: 0,
-                        adaCount: 0,
-                        qalaCount: 0,
-                        noCount: 0,
-                        daysActive: new Set(),
-                        dailyBreakdown: []
+                        daysActive: new Set()
                     };
                 }
                 
-                studentPoints[name].totalPoints += dailyPoints.total;
+                studentPoints[name].totalPoints += dailyPoints;
                 studentPoints[name].daysActive.add(record.Date);
-                studentPoints[name].dailyBreakdown.push({
-                    date: record.Date,
-                    points: dailyPoints.total,
-                    breakdown: dailyPoints.breakdown
-                });
-                
-                // Count prayer statuses
-                for (const prayer of PRAYER_COLUMNS) {
-                    const value = record[prayer];
-                    if (value) {
-                        const lowerValue = value.toLowerCase();
-                        if (lowerValue === "ada'" || lowerValue === "ada") {
-                            studentPoints[name].adaCount++;
-                        } else if (lowerValue === "qala'" || lowerValue === "qala") {
-                            studentPoints[name].qalaCount++;
-                        } else if (lowerValue === "no") {
-                            studentPoints[name].noCount++;
-                        }
-                    }
-                }
             }
             
             // Convert to array and sort
             let studentArray = Object.values(studentPoints);
             studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
             
-            // Add rank and format
+            // Add rank
             studentArray = studentArray.map((student, index) => ({
                 ...student,
                 rank: index + 1,
@@ -660,7 +566,7 @@
             }));
             
             return {
-                rankings: studentArray.slice(0, 7), // Top 7 for weekly view
+                rankings: studentArray,
                 startDate: startDateStr,
                 endDate: endDate,
                 totalStudents: studentArray.length
@@ -668,20 +574,20 @@
         }
         
         // ============================================
-        // 📊 Get Monthly Rankings
+        // 📊 Get Monthly Rankings (Current Month - real-time)
         // ============================================
-        function getMonthlyRankings(allData, year = null, month = null) {
+        function getMonthlyRankings(allData) {
             const today = new Date();
-            const targetYear = year || today.getFullYear();
-            const targetMonth = month !== null ? month : today.getMonth();
+            const currentYear = today.getFullYear();
+            const currentMonth = today.getMonth();
             
             // Calculate month range
-            const startDate = new Date(targetYear, targetMonth, 1);
-            const endDate = new Date(targetYear, targetMonth + 1, 0);
+            const startDate = new Date(currentYear, currentMonth, 1);
+            const endDate = new Date(currentYear, currentMonth + 1, 0);
             const startDateStr = startDate.toISOString().split('T')[0];
             const endDateStr = endDate.toISOString().split('T')[0];
             
-            // Collect all records from the month
+            // Collect all records from current month
             const monthlyRecords = [];
             
             for (const classNum in allData) {
@@ -711,36 +617,12 @@
                         name: name,
                         class: record.class,
                         totalPoints: 0,
-                        adaCount: 0,
-                        qalaCount: 0,
-                        noCount: 0,
-                        daysActive: new Set(),
-                        dailyBreakdown: []
+                        daysActive: new Set()
                     };
                 }
                 
-                studentPoints[name].totalPoints += dailyPoints.total;
+                studentPoints[name].totalPoints += dailyPoints;
                 studentPoints[name].daysActive.add(record.Date);
-                studentPoints[name].dailyBreakdown.push({
-                    date: record.Date,
-                    points: dailyPoints.total,
-                    breakdown: dailyPoints.breakdown
-                });
-                
-                // Count prayer statuses
-                for (const prayer of PRAYER_COLUMNS) {
-                    const value = record[prayer];
-                    if (value) {
-                        const lowerValue = value.toLowerCase();
-                        if (lowerValue === "ada'" || lowerValue === "ada") {
-                            studentPoints[name].adaCount++;
-                        } else if (lowerValue === "qala'" || lowerValue === "qala") {
-                            studentPoints[name].qalaCount++;
-                        } else if (lowerValue === "no") {
-                            studentPoints[name].noCount++;
-                        }
-                    }
-                }
             }
             
             // Convert to array and sort
@@ -758,8 +640,8 @@
             
             return {
                 rankings: studentArray,
-                month: monthNames[targetMonth],
-                year: targetYear,
+                month: monthNames[currentMonth],
+                year: currentYear,
                 startDate: startDateStr,
                 endDate: endDateStr,
                 totalStudents: studentArray.length
@@ -769,14 +651,17 @@
         // ============================================
         // 📊 Get Class Rankings (All Time)
         // ============================================
-        function getClassRankings(classData, className) {
+        function getClassRankings(classData, classNum) {
             const studentPoints = calculateStudentPoints(classData);
+            
+            // Calculate total submissions
+            const totalSubmissions = classData.length;
             
             return {
                 rankings: studentPoints,
-                className: className,
+                className: classNum,
                 totalStudents: studentPoints.length,
-                totalRecords: classData.length
+                totalSubmissions: totalSubmissions
             };
         }
         
@@ -795,9 +680,12 @@
                                 <i class="fas fa-calendar-week"></i>
                                 Weekly Rankings
                             </div>
-                            <div class="date-filter">
-                                <span class="text-sm text-gray-500">${weeklyData.startDate} - ${weeklyData.endDate}</span>
-                            </div>
+                            <button class="refresh-btn" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="date-badge" style="margin-bottom: 1rem;">
+                            <i class="fas fa-calendar-alt mr-1"></i> ${weeklyData.startDate} - ${weeklyData.endDate}
                         </div>
                         <div class="empty-state">
                             <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
@@ -815,12 +703,12 @@
                         <div class="stat-label">Active Students</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">7</div>
-                        <div class="stat-label">Days Tracked</div>
-                    </div>
-                    <div class="stat-card">
                         <div class="stat-value">${weeklyData.rankings[0]?.totalPoints || 0}</div>
                         <div class="stat-label">Top Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${weeklyData.rankings.length}</div>
+                        <div class="stat-label">Total Participants</div>
                     </div>
                 </div>
             `;
@@ -833,25 +721,17 @@
                 else if (student.rank === 2) rankClass = 'rank-2';
                 else if (student.rank === 3) rankClass = 'rank-3';
                 
-                // Calculate average per day
-                const avgPerDay = (student.totalPoints / student.daysActive).toFixed(1);
-                
                 tableRows += `
                     <tr>
                         <td class="rank-cell">
                             <span class="${rankClass} font-bold">#${student.rank}</span>
                         </td>
                         <td>
-                            <div class="font-medium">${student.name}</div>
+                            <div class="font-medium">${escapeHtml(student.name)}</div>
                             <div class="text-xs text-gray-500">Class ${student.class}</div>
                         </td>
                         <td class="points-cell">${student.totalPoints} pts</td>
-                        <td class="text-sm text-gray-500">${student.daysActive}/7 days<br><span class="text-xs">(avg ${avgPerDay}/day)</span></td>
-                        <td>
-                            <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
-                            <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
-                            <span class="badge badge-no ml-1"><i class="fas fa-times-circle text-xs"></i> ${student.noCount}</span>
-                        </td>
+                        <td class="text-sm text-gray-500">${student.daysActive}/7 days</td>
                     </tr>
                 `;
             });
@@ -861,11 +741,14 @@
                     <div class="ranking-header">
                         <div class="ranking-title">
                             <i class="fas fa-calendar-week"></i>
-                            Weekly Rankings - Top 7 Students
+                            Weekly Rankings (Last 7 Days)
                         </div>
-                        <div class="date-filter">
-                            <span class="text-sm text-gray-500">${weeklyData.startDate} - ${weeklyData.endDate}</span>
-                        </div>
+                        <button class="refresh-btn" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="date-badge" style="margin-bottom: 1rem;">
+                        <i class="fas fa-calendar-alt mr-1"></i> ${weeklyData.startDate} - ${weeklyData.endDate}
                     </div>
                     ${statsHtml}
                     <div style="overflow-x: auto;">
@@ -876,7 +759,6 @@
                                     <th>Student</th>
                                     <th>Total Points</th>
                                     <th>Active Days</th>
-                                    <th>Prayer Stats</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -884,8 +766,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-4 text-xs text-gray-400 text-center">
-                        <i class="fas fa-info-circle"></i> Points: Adā' = +3 | Qaḍā' = +2 | No = -1 (per prayer)
+                    <div class="points-legend">
+                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = +3 points</span>
+                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = +2 points</span>
+                        <span class="legend-item"><span class="legend-color no"></span> No = -1 point</span>
+                        <span class="legend-item"><i class="fas fa-calculator"></i> Daily Total = Sum of 5 prayers</span>
                     </div>
                 </div>
             `;
@@ -900,8 +785,14 @@
                         <div class="ranking-header">
                             <div class="ranking-title">
                                 <i class="fas fa-calendar-alt"></i>
-                                Monthly Rankings - ${monthlyData.month} ${monthlyData.year}
+                                Monthly Rankings
                             </div>
+                            <button class="refresh-btn" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
+                        </div>
+                        <div class="date-badge" style="margin-bottom: 1rem;">
+                            <i class="fas fa-calendar-alt mr-1"></i> ${monthlyData.month} ${monthlyData.year}
                         </div>
                         <div class="empty-state">
                             <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
@@ -929,7 +820,7 @@
                 </div>
             `;
             
-            // Rankings table (all students for monthly)
+            // Rankings table
             let tableRows = '';
             monthlyData.rankings.forEach((student) => {
                 let rankClass = '';
@@ -937,24 +828,17 @@
                 else if (student.rank === 2) rankClass = 'rank-2';
                 else if (student.rank === 3) rankClass = 'rank-3';
                 
-                const avgPerDay = (student.totalPoints / student.daysActive).toFixed(1);
-                
                 tableRows += `
                     <tr>
                         <td class="rank-cell">
                             <span class="${rankClass} font-bold">#${student.rank}</span>
                         </td>
                         <td>
-                            <div class="font-medium">${student.name}</div>
+                            <div class="font-medium">${escapeHtml(student.name)}</div>
                             <div class="text-xs text-gray-500">Class ${student.class}</div>
                         </td>
                         <td class="points-cell">${student.totalPoints} pts</td>
-                        <td class="text-sm text-gray-500">${student.daysActive} days<br><span class="text-xs">(avg ${avgPerDay}/day)</span></td>
-                        <td>
-                            <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
-                            <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
-                            <span class="badge badge-no ml-1"><i class="fas fa-times-circle text-xs"></i> ${student.noCount}</span>
-                        </td>
+                        <td class="text-sm text-gray-500">${student.daysActive} days</td>
                     </tr>
                 `;
             });
@@ -966,9 +850,12 @@
                             <i class="fas fa-calendar-alt"></i>
                             Monthly Rankings - ${monthlyData.month} ${monthlyData.year}
                         </div>
-                        <div class="date-filter">
-                            <span class="text-sm text-gray-500">${monthlyData.startDate} - ${monthlyData.endDate}</span>
-                        </div>
+                        <button class="refresh-btn" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
+                    </div>
+                    <div class="date-badge" style="margin-bottom: 1rem;">
+                        <i class="fas fa-calendar-alt mr-1"></i> ${monthlyData.startDate} - ${monthlyData.endDate}
                     </div>
                     ${statsHtml}
                     <div style="overflow-x: auto;">
@@ -979,7 +866,6 @@
                                     <th>Student</th>
                                     <th>Total Points</th>
                                     <th>Active Days</th>
-                                    <th>Prayer Stats</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -987,8 +873,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-4 text-xs text-gray-400 text-center">
-                        <i class="fas fa-info-circle"></i> Points: Adā' = +3 | Qaḍā' = +2 | No = -1 (per prayer)
+                    <div class="points-legend">
+                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = +3 points</span>
+                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = +2 points</span>
+                        <span class="legend-item"><span class="legend-color no"></span> No = -1 point</span>
+                        <span class="legend-item"><i class="fas fa-calculator"></i> Daily Total = Sum of 5 prayers</span>
                     </div>
                 </div>
             `;
@@ -1005,6 +894,9 @@
                                 <i class="fas fa-graduation-cap"></i>
                                 Class ${classNum} Rankings
                             </div>
+                            <button class="refresh-btn" onclick="refreshData()">
+                                <i class="fas fa-sync-alt"></i> Refresh
+                            </button>
                         </div>
                         <div class="empty-state">
                             <i class="fas fa-users text-4xl mb-3 opacity-50"></i>
@@ -1019,14 +911,14 @@
                 <div class="stats-grid">
                     <div class="stat-card">
                         <div class="stat-value">${classRankings.totalStudents}</div>
-                        <div class="stat-label">Students</div>
+                        <div class="stat-label">Total Students</div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-value">${classRankings.rankings[0]?.totalPoints || 0}</div>
                         <div class="stat-label">Top Score</div>
                     </div>
                     <div class="stat-card">
-                        <div class="stat-value">${classRankings.totalRecords}</div>
+                        <div class="stat-value">${classRankings.totalSubmissions}</div>
                         <div class="stat-label">Total Submissions</div>
                     </div>
                 </div>
@@ -1040,23 +932,16 @@
                 else if (student.rank === 2) rankClass = 'rank-2';
                 else if (student.rank === 3) rankClass = 'rank-3';
                 
-                const avgPerDay = (student.totalPoints / student.daysCount).toFixed(1);
-                
                 tableRows += `
                     <tr>
                         <td class="rank-cell">
                             <span class="${rankClass} font-bold">#${student.rank}</span>
                         </td>
                         <td>
-                            <div class="font-medium">${student.name}</div>
+                            <div class="font-medium">${escapeHtml(student.name)}</div>
                         </td>
                         <td class="points-cell">${student.totalPoints} pts</td>
-                        <td class="text-sm text-gray-500">${student.daysCount} days<br><span class="text-xs">(avg ${avgPerDay}/day)</span></td>
-                        <td>
-                            <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
-                            <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
-                            <span class="badge badge-no ml-1"><i class="fas fa-times-circle text-xs"></i> ${student.noCount}</span>
-                        </td>
+                        <td class="text-sm text-gray-500">${student.daysCount} days</td>
                     </tr>
                 `;
             });
@@ -1068,9 +953,9 @@
                             <i class="fas fa-graduation-cap"></i>
                             Class ${classNum} Rankings (All Time)
                         </div>
-                        <div class="date-filter">
-                            <span class="text-sm text-gray-500">Total Points from All Submissions</span>
-                        </div>
+                        <button class="refresh-btn" onclick="refreshData()">
+                            <i class="fas fa-sync-alt"></i> Refresh
+                        </button>
                     </div>
                     ${statsHtml}
                     <div style="overflow-x: auto;">
@@ -1081,7 +966,6 @@
                                     <th>Student</th>
                                     <th>Total Points</th>
                                     <th>Active Days</th>
-                                    <th>Prayer Stats</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -1089,39 +973,96 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-4 text-xs text-gray-400 text-center">
-                        <i class="fas fa-info-circle"></i> Points: Adā' = +3 | Qaḍā' = +2 | No = -1 (per prayer)
-                        <br>Daily Total = Sum of all 5 prayers
+                    <div class="points-legend">
+                        <span class="legend-item"><span class="legend-color ada"></span> Adā' = +3 points</span>
+                        <span class="legend-item"><span class="legend-color qala"></span> Qaḍā' = +2 points</span>
+                        <span class="legend-item"><span class="legend-color no"></span> No = -1 point</span>
+                        <span class="legend-item"><i class="fas fa-calculator"></i> Daily Total = Sum of 5 prayers</span>
                     </div>
                 </div>
             `;
+        }
+        
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
         }
         
         // ============================================
         // 🎯 Main Controller
         // ============================================
         async function loadPage(page) {
+            if (isLoading) return;
+            
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+            isLoading = true;
             
-            // Load data if not cached
-            if (Object.keys(cachedData).length === 0) {
-                await loadAllClassData();
+            try {
+                // Load data if not cached
+                if (Object.keys(cachedData).length === 0) {
+                    await loadAllClassData();
+                }
+                
+                let html = '';
+                
+                if (page === 'weekly') {
+                    html = renderWeeklyRankings(cachedData);
+                } else if (page === 'monthly') {
+                    html = renderMonthlyRankings(cachedData);
+                } else if (page.startsWith('class-')) {
+                    const classNum = parseInt(page.split('-')[1]);
+                    const classData = cachedData[classNum] || [];
+                    html = renderClassRankings(classData, classNum);
+                }
+                
+                mainContent.innerHTML = html;
+            } catch (error) {
+                console.error('Error loading page:', error);
+                mainContent.innerHTML = `
+                    <div class="ranking-card">
+                        <div class="empty-state">
+                            <i class="fas fa-exclamation-triangle text-4xl mb-3 text-red-500"></i>
+                            <p>Error loading data. Please try again.</p>
+                            <button class="refresh-btn mt-3" onclick="refreshData()">Try Again</button>
+                        </div>
+                    </div>
+                `;
+            } finally {
+                isLoading = false;
+            }
+        }
+        
+        async function loadAllClassData() {
+            const allData = {};
+            const promises = [];
+            
+            for (let i = 1; i <= 10; i++) {
+                const url = CLASS_URLS[i];
+                if (url) {
+                    promises.push(
+                        fetchCSV(url).then(data => {
+                            allData[i] = data;
+                        }).catch(error => {
+                            console.error(`Error loading class ${i}:`, error);
+                            allData[i] = [];
+                        })
+                    );
+                }
             }
             
-            let html = '';
-            
-            if (page === 'weekly') {
-                html = renderWeeklyRankings(cachedData);
-            } else if (page === 'monthly') {
-                html = renderMonthlyRankings(cachedData);
-            } else if (page.startsWith('class-')) {
-                const classNum = parseInt(page.split('-')[1]);
-                const classData = cachedData[classNum] || [];
-                html = renderClassRankings(classData, classNum);
-            }
-            
-            mainContent.innerHTML = html;
+            await Promise.all(promises);
+            cachedData = allData;
+            return allData;
+        }
+        
+        async function refreshData() {
+            // Clear cache and reload
+            cachedData = {};
+            await loadPage(currentPage);
         }
         
         // ============================================
@@ -1143,6 +1084,9 @@
             });
         }
         
+        // Make refreshData available globally
+        window.refreshData = refreshData;
+        
         // ============================================
         // 🚀 Initialize
         // ============================================
@@ -1153,7 +1097,7 @@
         
         console.log('%c🌙 Tharbiyya - Student Ranking System 🌙', 'color: #059669; font-size: 16px; font-weight: bold;');
         console.log('%cPoints: Adā\' = +3 | Qaḍā\' = +2 | No = -1 (per prayer)', 'color: #1f2937; font-size: 12px;');
-        console.log('%cDaily Total = Sum of all 5 prayers', 'color: #1f2937; font-size: 12px;');
+        console.log('%cDaily Total = Sum of all 5 prayers | Rankings update in real-time', 'color: #1f2937; font-size: 12px;');
     </script>
 </body>
 </html>
