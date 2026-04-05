@@ -109,6 +109,41 @@
             font-size: 1.75rem;
         }
         
+        .week-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: #f9fafb;
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+        }
+        
+        .week-selector label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        
+        .week-dropdown {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 40px;
+            font-size: 0.85rem;
+            background: white;
+            cursor: pointer;
+            outline: none;
+            transition: all 0.2s ease;
+        }
+        
+        .week-dropdown:hover {
+            border-color: #059669;
+        }
+        
+        .week-dropdown:focus {
+            border-color: #059669;
+            box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
+        }
+        
         .refresh-btn {
             background: #f3f4f6;
             border: none;
@@ -231,6 +266,8 @@
             .ranking-table th, .ranking-table td { padding: 0.75rem 0.5rem; font-size: 0.8rem; }
             .ranking-title { font-size: 1.2rem; }
             .points-cell { font-size: 1rem; }
+            .week-selector { padding: 0.25rem 0.75rem; }
+            .week-dropdown { font-size: 0.75rem; padding: 0.25rem 0.75rem; }
         }
         
         .points-legend {
@@ -315,8 +352,8 @@
     <script>
         // ============================================
         // THARBIYYA - Ranking System
-        // CSV Columns: Date, Time, name, class, subh, zuhr, asr, magrib, isha
-        // Points: 3, 2, -1 directly from sheet
+        // Weekly calculation: Saturday to Friday
+        // Week selector dropdown available
         // ============================================
         
         const CLASS_URLS = {
@@ -336,6 +373,8 @@
         let currentPage = "weekly";
         let cachedData = {};
         let isLoading = false;
+        let currentWeekStart = null;
+        let availableWeeks = [];
         
         async function fetchCSV(url) {
             try {
@@ -401,20 +440,108 @@
             return dailyTotal;
         }
         
-        function getWeeklyRankings(allData) {
-            const today = new Date();
-            const endDate = today.toISOString().split('T')[0];
-            const startDate = new Date(today);
-            startDate.setDate(today.getDate() - 6);
-            const startDateStr = startDate.toISOString().split('T')[0];
+        // Get week start date (Saturday) for a given date
+        function getWeekStart(date) {
+            const d = new Date(date);
+            const day = d.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+            // If today is Saturday (6), don't subtract
+            // Otherwise subtract (day + 1) to go back to previous Saturday
+            let daysToSubtract;
+            if (day === 6) {
+                daysToSubtract = 0;
+            } else {
+                daysToSubtract = day + 1;
+            }
+            d.setDate(d.getDate() - daysToSubtract);
+            return d;
+        }
+        
+        // Format date as YYYY-MM-DD
+        function formatDate(date) {
+            return date.toISOString().split('T')[0];
+        }
+        
+        // Generate available weeks from the data
+        function generateAvailableWeeks(allData) {
+            const weeksSet = new Set();
+            const allDates = [];
             
+            // Collect all dates from all records
+            for (const classNum in allData) {
+                const records = allData[classNum];
+                for (const record of records) {
+                    if (record.date) {
+                        allDates.push(record.date);
+                    }
+                }
+            }
+            
+            if (allDates.length === 0) return [];
+            
+            // Sort dates
+            allDates.sort();
+            const firstDate = new Date(allDates[0]);
+            const lastDate = new Date(allDates[allDates.length - 1]);
+            
+            // Generate weeks from first date to last date
+            let currentWeekStart = getWeekStart(firstDate);
+            const lastWeekStart = getWeekStart(lastDate);
+            
+            while (currentWeekStart <= lastWeekStart) {
+                const weekEnd = new Date(currentWeekStart);
+                weekEnd.setDate(currentWeekStart.getDate() + 6);
+                
+                const weekKey = formatDate(currentWeekStart);
+                weeksSet.add(weekKey);
+                
+                // Move to next week
+                currentWeekStart.setDate(currentWeekStart.getDate() + 7);
+            }
+            
+            // Convert to array and sort descending (latest first)
+            let weeks = Array.from(weeksSet);
+            weeks.sort().reverse();
+            
+            return weeks;
+        }
+        
+        // Get week date range for display
+        function getWeekDateRange(weekStartDate) {
+            const start = new Date(weekStartDate);
+            const end = new Date(start);
+            end.setDate(start.getDate() + 6);
+            
+            const startStr = formatDate(start);
+            const endStr = formatDate(end);
+            
+            // Format for display: DD MMM YYYY
+            const formatDisplay = (date) => {
+                return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+            };
+            
+            return {
+                start: startStr,
+                end: endStr,
+                display: `${formatDisplay(start)} - ${formatDisplay(end)}`
+            };
+        }
+        
+        // Get rankings for a specific week (Saturday to Friday)
+        function getWeeklyRankingsForWeek(allData, weekStartDate) {
+            const startDateStr = weekStartDate;
+            const startDate = new Date(weekStartDate);
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+            const endDateStr = formatDate(endDate);
+            
+            // Collect all records from this week
             const weeklyRecords = [];
             
             for (const classNum in allData) {
                 const records = allData[classNum];
                 for (const record of records) {
                     const recordDate = record.date;
-                    if (recordDate && recordDate >= startDateStr && recordDate <= endDate) {
+                    if (recordDate && recordDate >= startDateStr && recordDate <= endDateStr) {
                         weeklyRecords.push({
                             ...record,
                             class: classNum
@@ -423,6 +550,7 @@
                 }
             }
             
+            // Calculate points for each student
             const studentPoints = {};
             
             for (const record of weeklyRecords) {
@@ -457,7 +585,7 @@
                 rankings: studentArray.slice(0, 10),
                 allRankings: studentArray,
                 startDate: startDateStr,
-                endDate: endDate,
+                endDate: endDateStr,
                 totalStudents: studentArray.length
             };
         }
@@ -567,18 +695,65 @@
             };
         }
         
-        function renderWeeklyRankings(allData) {
-            const weeklyData = getWeeklyRankings(allData);
+        function renderWeeklyRankings(allData, selectedWeek = null) {
+            // Generate available weeks if not already done
+            if (availableWeeks.length === 0) {
+                availableWeeks = generateAvailableWeeks(allData);
+            }
             
-            if (!weeklyData.rankings || weeklyData.rankings.length === 0) {
+            // Determine which week to show
+            let weekStart = selectedWeek;
+            if (!weekStart && availableWeeks.length > 0) {
+                weekStart = availableWeeks[0]; // Latest week by default
+            }
+            
+            if (!weekStart) {
                 return `
                     <div class="ranking-card">
                         <div class="ranking-header">
                             <div class="ranking-title"><i class="fas fa-calendar-week"></i>Weekly Rankings</div>
                             <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
                         </div>
-                        <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> ${weeklyData.startDate} - ${weeklyData.endDate}</div>
-                        <div class="empty-state"><i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i><p>No data available for this week</p></div>
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
+                            <p>No data available</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            const weeklyData = getWeeklyRankingsForWeek(allData, weekStart);
+            const weekRange = getWeekDateRange(weekStart);
+            
+            // Build week selector dropdown
+            let weekOptions = '';
+            availableWeeks.forEach(week => {
+                const range = getWeekDateRange(week);
+                const selected = week === weekStart ? 'selected' : '';
+                weekOptions += `<option value="${week}" ${selected}>${range.display}</option>`;
+            });
+            
+            const selectorHtml = `
+                <div class="week-selector">
+                    <label><i class="fas fa-calendar-week mr-1"></i>Select Week:</label>
+                    <select id="weekSelect" class="week-dropdown" onchange="changeWeek(this.value)">
+                        ${weekOptions}
+                    </select>
+                </div>
+            `;
+            
+            if (!weeklyData.rankings || weeklyData.rankings.length === 0) {
+                return `
+                    <div class="ranking-card">
+                        <div class="ranking-header">
+                            <div class="ranking-title"><i class="fas fa-calendar-week"></i>Weekly Rankings</div>
+                            ${selectorHtml}
+                        </div>
+                        <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> Week: ${weekRange.display} (Saturday-Friday)</div>
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
+                            <p>No data available for this week</p>
+                        </div>
                     </div>
                 `;
             }
@@ -612,13 +787,15 @@
                 <div class="ranking-card">
                     <div class="ranking-header">
                         <div class="ranking-title"><i class="fas fa-calendar-week"></i>Weekly Rankings (Top 10)</div>
-                        <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
+                        ${selectorHtml}
                     </div>
-                    <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> ${weeklyData.startDate} - ${weeklyData.endDate}</div>
+                    <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> Week: ${weekRange.display} (Saturday-Friday)</div>
                     ${statsHtml}
                     <div style="overflow-x: auto;">
                         <table class="ranking-table">
-                            <thead><tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Active Days</th></tr></thead>
+                            <thead>
+                                <tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Active Days</th></tr>
+                            </thead>
                             <tbody>${tableRows}</tbody>
                         </table>
                     </div>
@@ -643,7 +820,10 @@
                             <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
                         </div>
                         <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> ${monthlyData.month} ${monthlyData.year}</div>
-                        <div class="empty-state"><i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i><p>No data available for this month</p></div>
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
+                            <p>No data available for this month</p>
+                        </div>
                     </div>
                 `;
             }
@@ -707,7 +887,10 @@
                             <div class="ranking-title"><i class="fas fa-graduation-cap"></i>Class ${classNum} Rankings</div>
                             <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
                         </div>
-                        <div class="empty-state"><i class="fas fa-users text-4xl mb-3 opacity-50"></i><p>No data available for Class ${classNum}</p></div>
+                        <div class="empty-state">
+                            <i class="fas fa-users text-4xl mb-3 opacity-50"></i>
+                            <p>No data available for Class ${classNum}</p>
+                        </div>
                     </div>
                 `;
             }
@@ -767,7 +950,7 @@
             return div.innerHTML;
         }
         
-        async function loadPage(page) {
+        async function loadPage(page, weekValue = null) {
             if (isLoading) return;
             
             const mainContent = document.getElementById('mainContent');
@@ -781,7 +964,7 @@
                 
                 let html = '';
                 if (page === 'weekly') {
-                    html = renderWeeklyRankings(cachedData);
+                    html = renderWeeklyRankings(cachedData, weekValue);
                 } else if (page === 'monthly') {
                     html = renderMonthlyRankings(cachedData);
                 } else if (page.startsWith('class-')) {
@@ -827,12 +1010,23 @@
             
             await Promise.all(promises);
             cachedData = allData;
+            
+            // Generate available weeks after data is loaded
+            availableWeeks = generateAvailableWeeks(cachedData);
+            
             return allData;
         }
         
         async function refreshData() {
             cachedData = {};
+            availableWeeks = [];
             await loadPage(currentPage);
+        }
+        
+        async function changeWeek(weekValue) {
+            if (currentPage === 'weekly') {
+                await loadPage('weekly', weekValue);
+            }
         }
         
         function setupNavigation() {
@@ -847,7 +1041,9 @@
             });
         }
         
+        // Make functions available globally
         window.refreshData = refreshData;
+        window.changeWeek = changeWeek;
         
         document.addEventListener('DOMContentLoaded', async () => {
             setupNavigation();
@@ -855,7 +1051,7 @@
         });
         
         console.log('%c🌙 Tharbiyya - Student Ranking System 🌙', 'color: #059669; font-size: 16px; font-weight: bold');
-        console.log('%cReading points directly from Google Sheet (3, 2, -1)', 'color: #1f2937; font-size: 12px');
+        console.log('%cWeek calculation: Saturday to Friday | Week selector available', 'color: #1f2937; font-size: 12px');
     </script>
 </body>
 </html>
