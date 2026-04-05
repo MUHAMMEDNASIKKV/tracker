@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <title>Tharbiyya - Student Rankings | نظام الترتيب</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts - Arabic Support -->
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
+            min-height: 100vh;
+        }
+        
+        .arabic-text {
+            font-family: 'Amiri', serif;
+        }
+        
+        /* Navigation */
+        .nav-container {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding: 0.75rem 1rem;
+            scrollbar-width: thin;
+        }
+        
+        .nav-links::-webkit-scrollbar {
+            height: 3px;
+        }
+        
+        .nav-btn {
+            padding: 0.5rem 1rem;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            transition: all 0.2s ease;
+            background: #f3f4f6;
+            color: #4b5563;
+            white-space: nowrap;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .nav-btn:hover {
+            background: #e5e7eb;
+            transform: translateY(-1px);
+        }
+        
+        .nav-btn.active {
+            background: #059669;
+            color: white;
+        }
+        
+        /* Main Container */
+        .main-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+        
+        /* Ranking Card */
+        .ranking-card {
+            background: white;
+            border-radius: 24px;
+            padding: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+        
+        .ranking-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .ranking-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .ranking-title i {
+            color: #059669;
+            font-size: 1.75rem;
+        }
+        
+        .date-filter {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .date-input {
+            padding: 0.5rem 0.75rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 0.85rem;
+        }
+        
+        /* Table Styles */
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .ranking-table th,
+        .ranking-table td {
+            padding: 1rem 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .ranking-table th {
+            background: #f9fafb;
+            font-weight: 600;
+            color: #374151;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .ranking-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .rank-cell {
+            font-weight: 700;
+            width: 70px;
+        }
+        
+        .rank-1 {
+            color: #fbbf24;
+        }
+        
+        .rank-2 {
+            color: #9ca3af;
+        }
+        
+        .rank-3 {
+            color: #cd7f32;
+        }
+        
+        .points-cell {
+            font-weight: 700;
+            color: #059669;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 3rem;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #059669;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #9ca3af;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .main-container {
+                padding: 1rem;
+            }
+            
+            .ranking-card {
+                padding: 1rem;
+            }
+            
+            .ranking-table th,
+            .ranking-table td {
+                padding: 0.75rem 0.5rem;
+                font-size: 0.8rem;
+            }
+            
+            .ranking-title {
+                font-size: 1.2rem;
+            }
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #059669, #047857);
+            border-radius: 20px;
+            padding: 1.25rem;
+            color: white;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .stat-label {
+            font-size: 0.8rem;
+            opacity: 0.9;
+            margin-top: 0.25rem;
+        }
+        
+        /* Badge */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.25rem 0.5rem;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .badge-ada {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        
+        .badge-qala {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+        
+        .badge-no {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <div class="nav-container">
+        <div class="max-w-[1400px] mx-auto">
+            <div class="nav-links" id="navLinks">
+                <button class="nav-btn active" data-page="weekly">
+                    <i class="fas fa-calendar-week mr-2"></i>Weekly Rankings
+                </button>
+                <button class="nav-btn" data-page="monthly">
+                    <i class="fas fa-calendar-alt mr-2"></i>Monthly Rankings
+                </button>
+                <button class="nav-btn" data-page="class-1">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 1
+                </button>
+                <button class="nav-btn" data-page="class-2">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 2
+                </button>
+                <button class="nav-btn" data-page="class-3">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 3
+                </button>
+                <button class="nav-btn" data-page="class-4">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 4
+                </button>
+                <button class="nav-btn" data-page="class-5">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 5
+                </button>
+                <button class="nav-btn" data-page="class-6">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 6
+                </button>
+                <button class="nav-btn" data-page="class-7">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 7
+                </button>
+                <button class="nav-btn" data-page="class-8">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 8
+                </button>
+                <button class="nav-btn" data-page="class-9">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 9
+                </button>
+                <button class="nav-btn" data-page="class-10">
+                    <i class="fas fa-graduation-cap mr-2"></i>Class 10
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-container" id="mainContent">
+        <div class="loading-spinner">
+            <div class="spinner"></div>
+        </div>
+    </div>
+    
+    <script>
+        // ============================================
+        // THARBIYYA - Ranking System
+        // Points: Ada' = 3, Qala' = 2, No = -1
+        // ============================================
+        
+        // CSV URLs for each class
+        const CLASS_URLS = {
+            1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=489329760&single=true&output=csv",
+            2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=428928738&single=true&output=csv",
+            3: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1221669068&single=true&output=csv",
+            4: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=217652018&single=true&output=csv",
+            5: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1691881671&single=true&output=csv",
+            6: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1246984609&single=true&output=csv",
+            7: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=469514472&single=true&output=csv",
+            8: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=272645470&single=true&output=csv",
+            9: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1743514473&single=true&output=csv",
+            10: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=820085037&single=true&output=csv"
+        };
+        
+        // Points system
+        const POINTS = {
+            "ada'": 3,
+            "qala'": 2,
+            "no": -1
+        };
+        
+        // Prayer columns (order: Subh, Zuhr, Asr, Magrib, Isha)
+        const PRAYER_COLUMNS = ["Subh", "Zuhr", "Asr", "Magrib", "Isha"];
+        
+        // Current page state
+        let currentPage = "weekly";
+        let cachedData = {};
+        
+        // ============================================
+        // 📥 Fetch and Parse CSV
+        // ============================================
+        async function fetchCSV(url) {
+            try {
+                const response = await fetch(url);
+                const text = await response.text();
+                return parseCSV(text);
+            } catch (error) {
+                console.error(`Error fetching ${url}:`, error);
+                return [];
+            }
+        }
+        
+        function parseCSV(csvText) {
+            const rows = [];
+            const lines = csvText.split('\n');
+            if (lines.length === 0) return rows;
+            
+            const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim());
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (lines[i].trim() === '') continue;
+                
+                // Parse CSV line with quoted values
+                const values = [];
+                let inQuote = false;
+                let currentValue = '';
+                
+                for (let char of lines[i]) {
+                    if (char === '"') {
+                        inQuote = !inQuote;
+                    } else if (char === ',' && !inQuote) {
+                        values.push(currentValue.trim());
+                        currentValue = '';
+                    } else {
+                        currentValue += char;
+                    }
+                }
+                values.push(currentValue.trim());
+                
+                // Remove quotes from values
+                const cleanValues = values.map(v => v.replace(/^"|"$/g, ''));
+                
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = cleanValues[index] || '';
+                });
+                
+                rows.push(row);
+            }
+            
+            return rows;
+        }
+        
+        // ============================================
+        // 📊 Calculate Points for a Single Record
+        // ============================================
+        function calculateRecordPoints(record) {
+            let totalPoints = 0;
+            let breakdown = {};
+            
+            for (const prayer of PRAYER_COLUMNS) {
+                const value = record[prayer];
+                if (value && POINTS[value]) {
+                    totalPoints += POINTS[value];
+                    breakdown[prayer] = POINTS[value];
+                } else if (value && value.toLowerCase) {
+                    const lowerValue = value.toLowerCase();
+                    if (lowerValue === "ada'" || lowerValue === "ada") {
+                        totalPoints += 3;
+                        breakdown[prayer] = 3;
+                    } else if (lowerValue === "qala'" || lowerValue === "qala") {
+                        totalPoints += 2;
+                        breakdown[prayer] = 2;
+                    } else if (lowerValue === "no") {
+                        totalPoints += -1;
+                        breakdown[prayer] = -1;
+                    }
+                }
+            }
+            
+            return { total: totalPoints, breakdown };
+        }
+        
+        // ============================================
+        // 📊 Calculate Student Total Points
+        // ============================================
+        function calculateStudentPoints(records) {
+            const studentPoints = {};
+            
+            for (const record of records) {
+                const name = record.Name || record.name;
+                if (!name) continue;
+                
+                const date = record.Date;
+                const points = calculateRecordPoints(record);
+                
+                if (!studentPoints[name]) {
+                    studentPoints[name] = {
+                        name: name,
+                        totalPoints: 0,
+                        dailyRecords: [],
+                        adaCount: 0,
+                        qalaCount: 0,
+                        noCount: 0
+                    };
+                }
+                
+                studentPoints[name].totalPoints += points.total;
+                studentPoints[name].dailyRecords.push({
+                    date: date,
+                    points: points.total,
+                    breakdown: points.breakdown
+                });
+                
+                // Count prayer statuses
+                for (const prayer of PRAYER_COLUMNS) {
+                    const value = record[prayer];
+                    if (value) {
+                        const lowerValue = value.toLowerCase();
+                        if (lowerValue === "ada'" || lowerValue === "ada") {
+                            studentPoints[name].adaCount++;
+                        } else if (lowerValue === "qala'" || lowerValue === "qala") {
+                            studentPoints[name].qalaCount++;
+                        } else if (lowerValue === "no") {
+                            studentPoints[name].noCount++;
+                        }
+                    }
+                }
+            }
+            
+            // Convert to array and sort by total points (descending)
+            const studentArray = Object.values(studentPoints);
+            studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
+            
+            // Add rank
+            studentArray.forEach((student, index) => {
+                student.rank = index + 1;
+            });
+            
+            return studentArray;
+        }
+        
+        // ============================================
+        // 📊 Filter Records by Date Range
+        // ============================================
+        function filterRecordsByDateRange(records, startDate, endDate) {
+            if (!startDate && !endDate) return records;
+            
+            return records.filter(record => {
+                const recordDate = record.Date;
+                if (!recordDate) return true;
+                
+                if (startDate && recordDate < startDate) return false;
+                if (endDate && recordDate > endDate) return false;
+                return true;
+            });
+        }
+        
+        // ============================================
+        // 📥 Load All Class Data
+        // ============================================
+        async function loadAllClassData() {
+            const allData = {};
+            
+            for (let i = 1; i <= 10; i++) {
+                const url = CLASS_URLS[i];
+                if (url) {
+                    const data = await fetchCSV(url);
+                    allData[i] = data;
+                }
+            }
+            
+            cachedData = allData;
+            return allData;
+        }
+        
+        // ============================================
+        // 📊 Get Weekly Rankings (All Classes Combined)
+        // ============================================
+        function getWeeklyRankings(allData, customEndDate = null) {
+            // Get current date or custom date
+            const today = customEndDate ? new Date(customEndDate) : new Date();
+            const endDate = today.toISOString().split('T')[0];
+            
+            // Calculate start date (7 days ago)
+            const startDate = new Date(today);
+            startDate.setDate(today.getDate() - 6);
+            const startDateStr = startDate.toISOString().split('T')[0];
+            
+            // Collect all records from last 7 days
+            const weeklyRecords = [];
+            
+            for (const classNum in allData) {
+                const records = allData[classNum];
+                for (const record of records) {
+                    const recordDate = record.Date;
+                    if (recordDate && recordDate >= startDateStr && recordDate <= endDate) {
+                        weeklyRecords.push({
+                            ...record,
+                            class: classNum
+                        });
+                    }
+                }
+            }
+            
+            // Calculate points for each student
+            const studentPoints = {};
+            
+            for (const record of weeklyRecords) {
+                const name = record.Name || record.name;
+                if (!name) continue;
+                
+                const points = calculateRecordPoints(record);
+                
+                if (!studentPoints[name]) {
+                    studentPoints[name] = {
+                        name: name,
+                        class: record.class,
+                        totalPoints: 0,
+                        adaCount: 0,
+                        qalaCount: 0,
+                        noCount: 0,
+                        daysActive: new Set()
+                    };
+                }
+                
+                studentPoints[name].totalPoints += points.total;
+                studentPoints[name].daysActive.add(record.Date);
+                
+                // Count prayer statuses
+                for (const prayer of PRAYER_COLUMNS) {
+                    const value = record[prayer];
+                    if (value) {
+                        const lowerValue = value.toLowerCase();
+                        if (lowerValue === "ada'" || lowerValue === "ada") {
+                            studentPoints[name].adaCount++;
+                        } else if (lowerValue === "qala'" || lowerValue === "qala") {
+                            studentPoints[name].qalaCount++;
+                        } else if (lowerValue === "no") {
+                            studentPoints[name].noCount++;
+                        }
+                    }
+                }
+            }
+            
+            // Convert to array and sort
+            let studentArray = Object.values(studentPoints);
+            studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
+            
+            // Add rank and format
+            studentArray = studentArray.map((student, index) => ({
+                ...student,
+                rank: index + 1,
+                daysActive: student.daysActive.size
+            }));
+            
+            return {
+                rankings: studentArray.slice(0, 7), // Top 7 for weekly view
+                startDate: startDateStr,
+                endDate: endDate,
+                totalStudents: studentArray.length
+            };
+        }
+        
+        // ============================================
+        // 📊 Get Monthly Rankings
+        // ============================================
+        function getMonthlyRankings(allData, year = null, month = null) {
+            const today = new Date();
+            const targetYear = year || today.getFullYear();
+            const targetMonth = month !== null ? month : today.getMonth();
+            
+            // Calculate month range
+            const startDate = new Date(targetYear, targetMonth, 1);
+            const endDate = new Date(targetYear, targetMonth + 1, 0);
+            const startDateStr = startDate.toISOString().split('T')[0];
+            const endDateStr = endDate.toISOString().split('T')[0];
+            
+            // Collect all records from the month
+            const monthlyRecords = [];
+            
+            for (const classNum in allData) {
+                const records = allData[classNum];
+                for (const record of records) {
+                    const recordDate = record.Date;
+                    if (recordDate && recordDate >= startDateStr && recordDate <= endDateStr) {
+                        monthlyRecords.push({
+                            ...record,
+                            class: classNum
+                        });
+                    }
+                }
+            }
+            
+            // Calculate points for each student
+            const studentPoints = {};
+            
+            for (const record of monthlyRecords) {
+                const name = record.Name || record.name;
+                if (!name) continue;
+                
+                const points = calculateRecordPoints(record);
+                
+                if (!studentPoints[name]) {
+                    studentPoints[name] = {
+                        name: name,
+                        class: record.class,
+                        totalPoints: 0,
+                        adaCount: 0,
+                        qalaCount: 0,
+                        noCount: 0,
+                        daysActive: new Set()
+                    };
+                }
+                
+                studentPoints[name].totalPoints += points.total;
+                studentPoints[name].daysActive.add(record.Date);
+                
+                // Count prayer statuses
+                for (const prayer of PRAYER_COLUMNS) {
+                    const value = record[prayer];
+                    if (value) {
+                        const lowerValue = value.toLowerCase();
+                        if (lowerValue === "ada'" || lowerValue === "ada") {
+                            studentPoints[name].adaCount++;
+                        } else if (lowerValue === "qala'" || lowerValue === "qala") {
+                            studentPoints[name].qalaCount++;
+                        } else if (lowerValue === "no") {
+                            studentPoints[name].noCount++;
+                        }
+                    }
+                }
+            }
+            
+            // Convert to array and sort
+            let studentArray = Object.values(studentPoints);
+            studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
+            
+            // Add rank
+            studentArray = studentArray.map((student, index) => ({
+                ...student,
+                rank: index + 1,
+                daysActive: student.daysActive.size
+            }));
+            
+            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            
+            return {
+                rankings: studentArray,
+                month: monthNames[targetMonth],
+                year: targetYear,
+                startDate: startDateStr,
+                endDate: endDateStr,
+                totalStudents: studentArray.length
+            };
+        }
+        
+        // ============================================
+        // 📊 Get Class Rankings
+        // ============================================
+        function getClassRankings(classData, className) {
+            const studentPoints = calculateStudentPoints(classData);
+            
+            return {
+                rankings: studentPoints,
+                className: className,
+                totalStudents: studentPoints.length,
+                totalRecords: classData.length
+            };
+        }
+        
+        // ============================================
+        // 🎨 Render Functions
+        // ============================================
+        
+        function renderWeeklyRankings(allData) {
+            const weeklyData = getWeeklyRankings(allData);
+            
+            if (!weeklyData.rankings || weeklyData.rankings.length === 0) {
+                return `
+                    <div class="ranking-card">
+                        <div class="ranking-header">
+                            <div class="ranking-title">
+                                <i class="fas fa-calendar-week"></i>
+                                Weekly Rankings
+                            </div>
+                            <div class="date-filter">
+                                <span class="text-sm text-gray-500">${weeklyData.startDate} - ${weeklyData.endDate}</span>
+                            </div>
+                        </div>
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
+                            <p>No data available for this week</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Stats cards
+            const statsHtml = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${weeklyData.totalStudents}</div>
+                        <div class="stat-label">Active Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">7</div>
+                        <div class="stat-label">Days Tracked</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${weeklyData.rankings[0]?.totalPoints || 0}</div>
+                        <div class="stat-label">Top Score</div>
+                    </div>
+                </div>
+            `;
+            
+            // Rankings table
+            let tableRows = '';
+            weeklyData.rankings.forEach((student, index) => {
+                let rankClass = '';
+                if (student.rank === 1) rankClass = 'rank-1';
+                else if (student.rank === 2) rankClass = 'rank-2';
+                else if (student.rank === 3) rankClass = 'rank-3';
+                
+                tableRows += `
+                    <tr>
+                        <td class="rank-cell">
+                            <span class="${rankClass} font-bold">#${student.rank}</span>
+                        </td>
+                        <td>
+                            <div class="font-medium">${student.name}</div>
+                            <div class="text-xs text-gray-500">Class ${student.class}</div>
+                        </td>
+                        <td class="points-cell">${student.totalPoints} pts</td>
+                        <td class="text-sm text-gray-500">${student.daysActive}/7 days</td>
+                        <td>
+                            <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
+                            <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
+                            <span class="badge badge-no ml-1"><i class="fas fa-times-circle text-xs"></i> ${student.noCount}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <div class="ranking-card">
+                    <div class="ranking-header">
+                        <div class="ranking-title">
+                            <i class="fas fa-calendar-week"></i>
+                            Weekly Rankings - Top 7 Students
+                        </div>
+                        <div class="date-filter">
+                            <span class="text-sm text-gray-500">${weeklyData.startDate} - ${weeklyData.endDate}</span>
+                        </div>
+                    </div>
+                    ${statsHtml}
+                    <div style="overflow-x: auto;">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student</th>
+                                    <th>Points</th>
+                                    <th>Active Days</th>
+                                    <th>Prayers</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderMonthlyRankings(allData) {
+            const monthlyData = getMonthlyRankings(allData);
+            
+            if (!monthlyData.rankings || monthlyData.rankings.length === 0) {
+                return `
+                    <div class="ranking-card">
+                        <div class="ranking-header">
+                            <div class="ranking-title">
+                                <i class="fas fa-calendar-alt"></i>
+                                Monthly Rankings - ${monthlyData.month} ${monthlyData.year}
+                            </div>
+                        </div>
+                        <div class="empty-state">
+                            <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
+                            <p>No data available for this month</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Stats cards
+            const statsHtml = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${monthlyData.totalStudents}</div>
+                        <div class="stat-label">Active Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${monthlyData.rankings[0]?.totalPoints || 0}</div>
+                        <div class="stat-label">Top Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${monthlyData.rankings.length}</div>
+                        <div class="stat-label">Total Participants</div>
+                    </div>
+                </div>
+            `;
+            
+            // Rankings table (all students for monthly)
+            let tableRows = '';
+            monthlyData.rankings.forEach((student, index) => {
+                let rankClass = '';
+                if (student.rank === 1) rankClass = 'rank-1';
+                else if (student.rank === 2) rankClass = 'rank-2';
+                else if (student.rank === 3) rankClass = 'rank-3';
+                
+                tableRows += `
+                    <tr>
+                        <td class="rank-cell">
+                            <span class="${rankClass} font-bold">#${student.rank}</span>
+                        </td>
+                        <td>
+                            <div class="font-medium">${student.name}</div>
+                            <div class="text-xs text-gray-500">Class ${student.class}</div>
+                        </td>
+                        <td class="points-cell">${student.totalPoints} pts</td>
+                        <td class="text-sm text-gray-500">${student.daysActive} days</td>
+                        <td>
+                            <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
+                            <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
+                            <span class="badge badge-no ml-1"><i class="fas fa-times-circle text-xs"></i> ${student.noCount}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <div class="ranking-card">
+                    <div class="ranking-header">
+                        <div class="ranking-title">
+                            <i class="fas fa-calendar-alt"></i>
+                            Monthly Rankings - ${monthlyData.month} ${monthlyData.year}
+                        </div>
+                        <div class="date-filter">
+                            <span class="text-sm text-gray-500">${monthlyData.startDate} - ${monthlyData.endDate}</span>
+                        </div>
+                    </div>
+                    ${statsHtml}
+                    <div style="overflow-x: auto;">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student</th>
+                                    <th>Points</th>
+                                    <th>Active Days</th>
+                                    <th>Prayers</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function renderClassRankings(classData, classNum) {
+            const classRankings = getClassRankings(classData, classNum);
+            
+            if (!classRankings.rankings || classRankings.rankings.length === 0) {
+                return `
+                    <div class="ranking-card">
+                        <div class="ranking-header">
+                            <div class="ranking-title">
+                                <i class="fas fa-graduation-cap"></i>
+                                Class ${classNum} Rankings
+                            </div>
+                        </div>
+                        <div class="empty-state">
+                            <i class="fas fa-users text-4xl mb-3 opacity-50"></i>
+                            <p>No data available for Class ${classNum}</p>
+                        </div>
+                    </div>
+                `;
+            }
+            
+            // Stats cards
+            const statsHtml = `
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value">${classRankings.totalStudents}</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${classRankings.rankings[0]?.totalPoints || 0}</div>
+                        <div class="stat-label">Top Score</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">${classRankings.totalRecords}</div>
+                        <div class="stat-label">Total Submissions</div>
+                    </div>
+                </div>
+            `;
+            
+            // Rankings table
+            let tableRows = '';
+            classRankings.rankings.forEach((student, index) => {
+                let rankClass = '';
+                if (student.rank === 1) rankClass = 'rank-1';
+                else if (student.rank === 2) rankClass = 'rank-2';
+                else if (student.rank === 3) rankClass = 'rank-3';
+                
+                tableRows += `
+                    <tr>
+                        <td class="rank-cell">
+                            <span class="${rankClass} font-bold">#${student.rank}</span>
+                        </td>
+                        <td>
+                            <div class="font-medium">${student.name}</div>
+                        </td>
+                        <td class="points-cell">${student.totalPoints} pts</td>
+                        <td>
+                            <span class="badge badge-ada"><i class="fas fa-check-circle text-xs"></i> ${student.adaCount}</span>
+                            <span class="badge badge-qala ml-1"><i class="fas fa-clock text-xs"></i> ${student.qalaCount}</span>
+                            <span class="badge badge-no ml-1"><i class="fas fa-times-circle text-xs"></i> ${student.noCount}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            return `
+                <div class="ranking-card">
+                    <div class="ranking-header">
+                        <div class="ranking-title">
+                            <i class="fas fa-graduation-cap"></i>
+                            Class ${classNum} Rankings
+                        </div>
+                        <div class="date-filter">
+                            <span class="text-sm text-gray-500">All Time</span>
+                        </div>
+                    </div>
+                    ${statsHtml}
+                    <div style="overflow-x: auto;">
+                        <table class="ranking-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Student</th>
+                                    <th>Total Points</th>
+                                    <th>Prayer Stats</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${tableRows}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+        
+        // ============================================
+        // 🎯 Main Controller
+        // ============================================
+        async function loadPage(page) {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+            
+            // Load data if not cached
+            if (Object.keys(cachedData).length === 0) {
+                await loadAllClassData();
+            }
+            
+            let html = '';
+            
+            if (page === 'weekly') {
+                html = renderWeeklyRankings(cachedData);
+            } else if (page === 'monthly') {
+                html = renderMonthlyRankings(cachedData);
+            } else if (page.startsWith('class-')) {
+                const classNum = parseInt(page.split('-')[1]);
+                const classData = cachedData[classNum] || [];
+                html = renderClassRankings(classData, classNum);
+            }
+            
+            mainContent.innerHTML = html;
+        }
+        
+        // ============================================
+        // 🔗 Navigation Setup
+        // ============================================
+        function setupNavigation() {
+            const navBtns = document.querySelectorAll('.nav-btn');
+            
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    // Update active state
+                    navBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    
+                    const page = btn.dataset.page;
+                    currentPage = page;
+                    await loadPage(page);
+                });
+            });
+        }
+        
+        // ============================================
+        // 🚀 Initialize
+        // ============================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            setupNavigation();
+            await loadPage('weekly');
+        });
+        
+        console.log('%c🌙 Tharbiyya - Student Ranking System 🌙', 'color: #059669; font-size: 16px; font-weight: bold;');
+        console.log('%cPoints: Adā\' = +3 | Qaḍā\' = +2 | No = -1', 'color: #1f2937; font-size: 12px;');
+    </script>
+</body>
+</html>
