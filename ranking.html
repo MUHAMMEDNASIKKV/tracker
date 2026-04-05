@@ -1,0 +1,789 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Tharbiyya - 5 Daily Prayers Tracker</title>
+    <!-- Font Awesome 6 (Free) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Google Fonts: Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1.5rem;
+        }
+
+        /* Main App Container */
+        .app-container {
+            max-width: 1300px;
+            width: 100%;
+            background: white;
+            border-radius: 2rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        /* Header */
+        .app-header {
+            background: #059669;
+            padding: 1.5rem 2rem;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+        }
+
+        .logo p {
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        .date-box {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            backdrop-filter: blur(4px);
+            font-weight: 500;
+        }
+
+        /* Page Containers */
+        .page {
+            padding: 2rem;
+            transition: 0.2s;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Login Card */
+        .login-card {
+            max-width: 500px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            padding: 2rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: #1f2937;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 1rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            outline: none;
+            background: #f9fafb;
+        }
+
+        select:focus, input:focus {
+            border-color: #059669;
+            box-shadow: 0 0 0 3px rgba(5,150,105,0.2);
+        }
+
+        .submit-btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 0.9rem;
+            width: 100%;
+            border-radius: 1rem;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .submit-btn:hover {
+            background: #047857;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #dc2626;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            margin-top: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        /* Dashboard Header */
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+            background: #f1f5f9;
+            padding: 1rem 1.5rem;
+            border-radius: 1.5rem;
+        }
+
+        .user-info h2 {
+            font-size: 1.5rem;
+            color: #0f172a;
+        }
+
+        .logout-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Prayer Grid */
+        .prayers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .prayer-card {
+            background: #ffffff;
+            border-radius: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .prayer-name {
+            font-weight: 800;
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: #1e293b;
+        }
+
+        .prayer-options {
+            display: flex;
+            justify-content: space-around;
+            gap: 0.5rem;
+        }
+
+        .prayer-option {
+            flex: 1;
+            background: #f8fafc;
+            border-radius: 1rem;
+            padding: 0.7rem 0.3rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+
+        .prayer-option i {
+            font-size: 1.3rem;
+            margin-bottom: 0.2rem;
+            display: block;
+        }
+
+        .prayer-option span {
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .prayer-option.selected {
+            background: #059669;
+            color: white;
+            border-color: #059669;
+            transform: scale(0.98);
+        }
+
+        /* Monthly Ranking Section */
+        .ranking-section {
+            background: #f8fafc;
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .ranking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+            gap: 1rem;
+        }
+
+        .month-selector {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            background: white;
+            padding: 0.3rem 1rem;
+            border-radius: 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .month-selector label {
+            margin: 0;
+            font-weight: 500;
+        }
+
+        #monthSelect {
+            width: auto;
+            padding: 0.5rem 1rem;
+            background: white;
+            border-radius: 2rem;
+            border: 1px solid #cbd5e1;
+        }
+
+        .ranking-table-wrapper {
+            overflow-x: auto;
+        }
+
+        .ranking-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+
+        .ranking-table th, .ranking-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .ranking-table th {
+            background: #059669;
+            color: white;
+            font-weight: 600;
+        }
+
+        .ranking-table tr:hover {
+            background: #f1f5f9;
+        }
+
+        .rank-badge {
+            font-weight: 800;
+            display: inline-block;
+            width: 32px;
+            text-align: center;
+        }
+
+        /* Custom Alert */
+        .custom-alert {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .custom-alert-content {
+            background: white;
+            max-width: 400px;
+            width: 90%;
+            border-radius: 2rem;
+            padding: 2rem;
+            text-align: center;
+            animation: fadeInUp 0.2s ease;
+        }
+        .custom-alert-icon i {
+            font-size: 4rem;
+            color: #059669;
+        }
+        .custom-alert-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 1rem 0;
+        }
+        .custom-alert-btn {
+            background: #059669;
+            border: none;
+            color: white;
+            padding: 0.7rem 1.5rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            margin-top: 1rem;
+            cursor: pointer;
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @media (max-width: 640px) {
+            .page { padding: 1rem; }
+            .prayer-option i { font-size: 1rem; }
+        }
+        .temp-info-message {
+            background: #ecfdf5;
+            border-left: 4px solid #059669;
+        }
+        footer {
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.75rem;
+            color: #64748b;
+            border-top: 1px solid #e2e8f0;
+        }
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+    <div class="app-header">
+        <div class="logo">
+            <h1><i class="fas fa-mosque"></i> Tharbiyya</h1>
+            <p>5 Daily Prayers Tracker | Adā' (2) • Qaḍā' (1) • No (0)</p>
+        </div>
+        <div class="date-box" id="globalDateDisplay"></div>
+    </div>
+
+    <!-- LOGIN PAGE -->
+    <div id="loginPage" class="page">
+        <div class="login-card">
+            <h2 style="text-align: center; margin-bottom: 1.5rem;">🔐 Student Login</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label><i class="fas fa-users"></i> Class</label>
+                    <select id="studentClass" required>
+                        <option value="" disabled selected>-- Select Class --</option>
+                        <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+                        <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+                        <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option>
+                        <option value="10">Class 10</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-user-graduate"></i> Student Name</label>
+                    <select id="studentName" required disabled>
+                        <option value="" disabled selected>-- First Select Class --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> Password</label>
+                    <input type="password" id="password" placeholder="Enter password" autocomplete="off">
+                </div>
+                <button type="submit" class="submit-btn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+                <div id="loginError" class="error-message hidden"><i class="fas fa-exclamation-triangle"></i><span></span></div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DASHBOARD PAGE (Prayer Tracker + Rankings) -->
+    <div id="dashboardPage" class="page hidden">
+        <div class="dashboard-header">
+            <div class="user-info">
+                <h2><i class="fas fa-user-check"></i> <span id="userNameDisplay"></span></h2>
+                <p><i class="fas fa-school"></i> <span id="userClassDisplay"></span></p>
+            </div>
+            <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+
+        <form id="prayerForm">
+            <div class="prayers-grid">
+                <div class="prayer-card"><div class="prayer-name">🌅 Subh (Fajr)</div><div class="prayer-options" data-prayer="subh"><div class="prayer-option" data-value="2"><i class="fas fa-check-circle"></i><span>Adā' (2)</span></div><div class="prayer-option" data-value="1"><i class="fas fa-clock"></i><span>Qaḍā' (1)</span></div><div class="prayer-option" data-value="0"><i class="fas fa-times-circle"></i><span>No (0)</span></div></div><input type="hidden" id="subh" name="subh"></div>
+                <div class="prayer-card"><div class="prayer-name">☀️ Zuhr</div><div class="prayer-options" data-prayer="zuhr"><div class="prayer-option" data-value="2"><i class="fas fa-check-circle"></i><span>Adā' (2)</span></div><div class="prayer-option" data-value="1"><i class="fas fa-clock"></i><span>Qaḍā' (1)</span></div><div class="prayer-option" data-value="0"><i class="fas fa-times-circle"></i><span>No (0)</span></div></div><input type="hidden" id="zuhr" name="zuhr"></div>
+                <div class="prayer-card"><div class="prayer-name">🌤️ Asr</div><div class="prayer-options" data-prayer="asr"><div class="prayer-option" data-value="2"><i class="fas fa-check-circle"></i><span>Adā' (2)</span></div><div class="prayer-option" data-value="1"><i class="fas fa-clock"></i><span>Qaḍā' (1)</span></div><div class="prayer-option" data-value="0"><i class="fas fa-times-circle"></i><span>No (0)</span></div></div><input type="hidden" id="asr" name="asr"></div>
+                <div class="prayer-card"><div class="prayer-name">🌇 Magrib</div><div class="prayer-options" data-prayer="magrib"><div class="prayer-option" data-value="2"><i class="fas fa-check-circle"></i><span>Adā' (2)</span></div><div class="prayer-option" data-value="1"><i class="fas fa-clock"></i><span>Qaḍā' (1)</span></div><div class="prayer-option" data-value="0"><i class="fas fa-times-circle"></i><span>No (0)</span></div></div><input type="hidden" id="magrib" name="magrib"></div>
+                <div class="prayer-card"><div class="prayer-name">🌙 Isha</div><div class="prayer-options" data-prayer="isha"><div class="prayer-option" data-value="2"><i class="fas fa-check-circle"></i><span>Adā' (2)</span></div><div class="prayer-option" data-value="1"><i class="fas fa-clock"></i><span>Qaḍā' (1)</span></div><div class="prayer-option" data-value="0"><i class="fas fa-times-circle"></i><span>No (0)</span></div></div><input type="hidden" id="isha" name="isha"></div>
+            </div>
+            <button type="submit" id="submitPrayerBtn" class="submit-btn" style="background:#059669;"><i class="fas fa-save"></i> Submit Today's Prayers</button>
+        </form>
+
+        <!-- Monthly Ranking Section with Dropdown -->
+        <div class="ranking-section">
+            <div class="ranking-header">
+                <h3><i class="fas fa-trophy"></i> Monthly Rankings (Total Points: Adā'=2, Qaḍā'=1)</h3>
+                <div class="month-selector">
+                    <label><i class="far fa-calendar-alt"></i> Select Month:</label>
+                    <select id="monthSelect"></select>
+                </div>
+            </div>
+            <div class="ranking-table-wrapper">
+                <table class="ranking-table" id="rankingTable">
+                    <thead>
+                        <tr><th>Rank</th><th>Student Name</th><th>Class</th><th>Total Points</th><th>Details</th></tr>
+                    </thead>
+                    <tbody id="rankingBody">
+                        <tr><td colspan="5" style="text-align:center;">Select a month to view rankings</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <footer>🕌 Prayer Tracker v2.0 | One submission per day | Monthly Leaderboard</footer>
+    </div>
+</div>
+
+<script>
+    // ======================= GLOBAL VARIABLES & CONFIGS =======================
+    let currentUser = null;
+    let currentClassSheet = null;
+    let currentDate = null;
+    let usersDataCache = null;
+    let isLoadingUsers = false;
+    const USER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=0&single=true&output=csv";
+    const CLASS_URLS = {
+        1:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=489329760&single=true&output=csv",
+        2:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=428928738&single=true&output=csv",
+        3:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1221669068&single=true&output=csv",
+        4:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=217652018&single=true&output=csv",
+        5:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1691881671&single=true&output=csv",
+        6:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1246984609&single=true&output=csv",
+        7:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=469514472&single=true&output=csv",
+        8:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=272645470&single=true&output=csv",
+        9:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1743514473&single=true&output=csv",
+        10:"https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=820085037&single=true&output=csv"
+    };
+    let submissionCache = new Map();
+
+    // Google Sheets API Wrapper
+    class GoogleSheetsAPI {
+        constructor() { this.apiUrl = "https://script.google.com/macros/s/AKfycbxyskFl5im3KbMks256GgowmoqfsNtyA10OF5vbEZ1V2K0dZ55V4204qAxNFtunmvQx/exec"; }
+        async addPrayerRecord(sheetName, rowData) {
+            try {
+                const res = await fetch(this.apiUrl, { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({ action:"addRecord", sheet:sheetName, data:JSON.stringify(rowData) }) });
+                return await res.json();
+            } catch(e) { return { error: e.message }; }
+        }
+        async ensureSheetExists(sheetName) {
+            try {
+                const res = await fetch(this.apiUrl, { method:"POST", headers:{"Content-Type":"application/x-www-form-urlencoded"}, body: new URLSearchParams({ action:"ensureSheet", sheet:sheetName }) });
+                return await res.json();
+            } catch(e) { return { error: e.message }; }
+        }
+    }
+    const api = new GoogleSheetsAPI();
+
+    // Load users from CSV
+    async function loadUsersFromCSV(forceReload = false) {
+        if (!forceReload && usersDataCache) return usersDataCache;
+        if (isLoadingUsers) { while(isLoadingUsers) await new Promise(r=>setTimeout(r,50)); return usersDataCache; }
+        isLoadingUsers = true;
+        try {
+            const resp = await fetch(USER_CSV_URL);
+            const csv = await resp.text();
+            const rows = csv.split('\n');
+            const headers = rows[0].split(',');
+            const nameIdx = headers.findIndex(h=>h.toLowerCase().trim()==='name');
+            const pswdIdx = headers.findIndex(h=>h.toLowerCase().trim()==='pswd');
+            const classIdx = headers.findIndex(h=>h.toLowerCase().trim()==='class');
+            if(nameIdx===-1||pswdIdx===-1||classIdx===-1) return [];
+            const users = [];
+            for(let i=1;i<rows.length;i++) {
+                if(rows[i].trim()==='') continue;
+                let values = [], cur='', inQuote=false;
+                for(let ch of rows[i]) { if(ch==='"') inQuote=!inQuote; else if(ch===','&&!inQuote){ values.push(cur.trim()); cur=''; } else cur+=ch; }
+                values.push(cur.trim());
+                values = values.map(v=>v.replace(/^"|"$/g,''));
+                if(values[nameIdx] && values[pswdIdx] && values[classIdx]) users.push({ name:values[nameIdx], password:values[pswdIdx], class:values[classIdx] });
+            }
+            usersDataCache = users;
+            return users;
+        } finally { isLoadingUsers = false; }
+    }
+
+    // Check if already submitted today
+    async function hasStudentSubmittedToday(studentClass, studentName, date) {
+        const key = `${studentClass}_${studentName}_${date}`;
+        if(submissionCache.has(key)) return submissionCache.get(key);
+        try {
+            const url = CLASS_URLS[parseInt(studentClass)];
+            if(!url) return false;
+            const resp = await fetch(url);
+            const csv = await resp.text();
+            const rows = csv.split('\n');
+            if(rows.length<2) return false;
+            const headers = rows[0].split(',');
+            const dateIdx = headers.findIndex(h=>h.toLowerCase().trim()==='date');
+            const nameIdx = headers.findIndex(h=>h.toLowerCase().trim()==='name');
+            if(dateIdx===-1||nameIdx===-1) return false;
+            for(let i=1;i<rows.length;i++) {
+                if(!rows[i].trim()) continue;
+                let vals=[], cur='', inQ=false;
+                for(let ch of rows[i]) { if(ch==='"') inQ=!inQ; else if(ch===','&&!inQ){ vals.push(cur.trim()); cur=''; } else cur+=ch; }
+                vals.push(cur.trim());
+                vals = vals.map(v=>v.replace(/^"|"$/g,''));
+                if(vals[dateIdx]===date && vals[nameIdx]===studentName) { submissionCache.set(key,true); return true; }
+            }
+            submissionCache.set(key,false);
+            return false;
+        } catch(e) { return false; }
+    }
+
+    // Helper: filter names by class
+    async function filterNamesByClass() {
+        const selectedClass = document.getElementById('studentClass').value;
+        const nameSelect = document.getElementById('studentName');
+        if(!selectedClass) { nameSelect.innerHTML='<option value="" disabled selected>-- First Select Class --</option>'; nameSelect.disabled=false; return; }
+        nameSelect.innerHTML='<option disabled>Loading...</option>';
+        nameSelect.disabled=true;
+        if(!usersDataCache) await loadUsersFromCSV();
+        const filtered = (usersDataCache||[]).filter(u=>u.class===selectedClass);
+        nameSelect.innerHTML='';
+        const defOpt = document.createElement('option'); defOpt.value=""; defOpt.disabled=true; defOpt.selected=true; defOpt.textContent="-- Select Student Name --";
+        nameSelect.appendChild(defOpt);
+        filtered.forEach(u=>{ let opt = document.createElement('option'); opt.value=u.name; opt.textContent=u.name; opt.dataset.class=u.class; opt.dataset.password=u.password; nameSelect.appendChild(opt); });
+        nameSelect.disabled=false;
+    }
+
+    // Login logic
+    async function login(event) {
+        event.preventDefault();
+        const selOpt = document.getElementById('studentName').selectedOptions[0];
+        const studentName = document.getElementById('studentName').value;
+        const studentClass = document.getElementById('studentClass').value;
+        const pwd = document.getElementById('password').value;
+        if(!studentClass||!studentName||!pwd) { showLoginError('Please fill all fields'); return; }
+        const storedPwd = selOpt?.dataset.password;
+        if(pwd !== storedPwd) { showLoginError('Invalid password'); return; }
+        const submitBtn = document.querySelector('#loginForm .submit-btn');
+        const orig = submitBtn.innerHTML;
+        submitBtn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Verifying...';
+        submitBtn.disabled=true;
+        try {
+            const already = await hasStudentSubmittedToday(studentClass, studentName, currentDate);
+            if(already) { showLoginError(`You already submitted today (${new Date().toLocaleDateString()}). Only one submission per day.`); return; }
+            currentUser = { name:studentName, class:studentClass, password:pwd };
+            currentClassSheet = `Class_${studentClass}`;
+            await api.ensureSheetExists(currentClassSheet);
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboardPage').classList.remove('hidden');
+            document.getElementById('userNameDisplay').innerText = currentUser.name;
+            document.getElementById('userClassDisplay').innerText = `Class ${currentUser.class}`;
+            document.getElementById('password').value = '';
+            // preload ranking default month (current month)
+            await loadMonthlyRankingsForCurrentSelection();
+        } catch(e) { showLoginError('Login failed. Try again.'); }
+        finally { submitBtn.innerHTML=orig; submitBtn.disabled=false; }
+    }
+
+    function showLoginError(msg) { const e=document.getElementById('loginError'); e.querySelector('span').innerText=msg; e.classList.remove('hidden'); }
+    function hideLoginError() { document.getElementById('loginError').classList.add('hidden'); }
+
+    // Prayer status helper
+    function getPrayerStatusText(val) { if(val==='2') return '✅ Adā\' (On time)'; if(val==='1') return '🕐 Qaḍā\' (Made up)'; return '❌ Not prayed'; }
+
+    async function submitPrayerForm(e) {
+        e.preventDefault();
+        const subh = document.getElementById('subh').value, zuhr = document.getElementById('zuhr').value, asr = document.getElementById('asr').value, magrib = document.getElementById('magrib').value, isha = document.getElementById('isha').value;
+        if(!subh||!zuhr||!asr||!magrib||!isha) { alert('Please select status for all 5 prayers'); return; }
+        const btn = document.getElementById('submitPrayerBtn');
+        const origText = btn.innerHTML;
+        btn.innerHTML='<i class="fas fa-spinner fa-spin"></i> Submitting...'; btn.disabled=true;
+        try {
+            const now = new Date(); const dateStr = now.toISOString().split('T')[0]; const timeStr = now.toLocaleTimeString('en-GB');
+            const rowData = [dateStr, timeStr, currentUser.name, currentUser.class, subh, zuhr, asr, magrib, isha];
+            const result = await api.addPrayerRecord(currentClassSheet, rowData);
+            if(result && result.success) {
+                const cacheKey = `${currentUser.class}_${currentUser.name}_${dateStr}`;
+                submissionCache.set(cacheKey, true);
+                const msg = `Your prayer status recorded.\n📅 ${new Date().toLocaleDateString()}\nSubh: ${getPrayerStatusText(subh)}\nZuhr: ${getPrayerStatusText(zuhr)}\nAsr: ${getPrayerStatusText(asr)}\nMagrib: ${getPrayerStatusText(magrib)}\nIsha: ${getPrayerStatusText(isha)}\nYou will be logged out.`;
+                showSuccessAlertWithLogout(msg, ()=>{
+                    currentUser=null; currentClassSheet=null;
+                    document.getElementById('loginForm').reset(); resetPrayerForm();
+                    document.getElementById('studentName').innerHTML='<option value="" disabled selected>-- First Select Class --</option>';
+                    document.getElementById('studentClass').value='';
+                    document.getElementById('dashboardPage').classList.add('hidden');
+                    document.getElementById('loginPage').classList.remove('hidden');
+                    const infoDiv = document.createElement('div'); infoDiv.className='error-message temp-info-message'; infoDiv.style.marginTop='1rem'; infoDiv.innerHTML=`<i class="fas fa-info-circle"></i><span>✓ You have submitted today's prayer status. You can submit again tomorrow.</span>`;
+                    document.querySelector('.login-card').appendChild(infoDiv);
+                    setTimeout(()=>infoDiv.remove(),5000);
+                });
+            } else throw new Error('Submission failed');
+        } catch(err) { alert('Submission failed. Try again.'); btn.innerHTML=origText; btn.disabled=false; }
+    }
+
+    function showSuccessAlertWithLogout(message, onComplete) {
+        const existing = document.querySelector('.custom-alert'); if(existing) existing.remove();
+        const div = document.createElement('div'); div.className='custom-alert'; div.innerHTML=`<div class="custom-alert-content"><div class="custom-alert-icon"><i class="fas fa-check-circle"></i></div><div class="custom-alert-title">Successfully Submitted!</div><div class="custom-alert-message">${message.replace(/\n/g,'<br>')}</div><button class="custom-alert-btn" id="customAlertOkBtn">OK</button></div>`;
+        document.body.appendChild(div);
+        document.getElementById('customAlertOkBtn').addEventListener('click',()=>{ div.remove(); if(onComplete) onComplete(); });
+    }
+
+    function resetPrayerForm() {
+        document.querySelectorAll('.prayer-options').forEach(c=>{ c.querySelectorAll('.prayer-option').forEach(opt=>opt.classList.remove('selected')); const p = c.dataset.prayer; if(p) document.getElementById(p).value=''; });
+        const btn = document.getElementById('submitPrayerBtn'); btn.disabled=false; btn.innerHTML='<i class="fas fa-save"></i> Submit Today\'s Prayers';
+    }
+
+    function initializePrayerOptions() { /* delegated event already in DOMContentLoaded */ }
+
+    // ========== MONTHLY RANKINGS LOGIC (exact month range: e.g., April 1 - April 30) ==========
+    async function loadMonthlyRankingsForCurrentSelection() {
+        const monthSelect = document.getElementById('monthSelect');
+        const selectedMonthValue = monthSelect.value; // format "2025-04"
+        if(!selectedMonthValue) return;
+        const [year, month] = selectedMonthValue.split('-');
+        const monthNum = parseInt(month);
+        // compute start and end date of month
+        const startDate = new Date(Date.UTC(year, monthNum-1, 1));
+        const endDate = new Date(Date.UTC(year, monthNum, 0)); // last day
+        const startStr = startDate.toISOString().split('T')[0];
+        const endStr = endDate.toISOString().split('T')[0];
+        
+        // Gather all students from all classes? Actually we need to fetch ALL class sheets? For ranking across all classes? We'll combine all sheets.
+        // For performance, we fetch each class CSV and aggregate entries within month range.
+        const allRecords = []; // { name, class, points }
+        for(let cls=1; cls<=10; cls++) {
+            const url = CLASS_URLS[cls];
+            if(!url) continue;
+            try {
+                const resp = await fetch(url);
+                const csv = await resp.text();
+                const rows = csv.split('\n');
+                if(rows.length<2) continue;
+                const headers = rows[0].split(',').map(h=>h.toLowerCase().trim());
+                const dateIdx = headers.indexOf('date');
+                const nameIdx = headers.indexOf('name');
+                const classIdxActual = headers.indexOf('class');
+                const subhIdx = headers.indexOf('subh'); const zuhrIdx = headers.indexOf('zuhr'); const asrIdx = headers.indexOf('asr'); const magribIdx = headers.indexOf('magrib'); const ishaIdx = headers.indexOf('isha');
+                if(dateIdx===-1 || nameIdx===-1) continue;
+                for(let i=1;i<rows.length;i++) {
+                    if(!rows[i].trim()) continue;
+                    let vals=[], cur='', inQ=false;
+                    for(let ch of rows[i]) { if(ch==='"') inQ=!inQ; else if(ch===','&&!inQ){ vals.push(cur.trim()); cur=''; } else cur+=ch; }
+                    vals.push(cur.trim());
+                    vals = vals.map(v=>v.replace(/^"|"$/g,''));
+                    const recordDate = vals[dateIdx];
+                    if(recordDate >= startStr && recordDate <= endStr) {
+                        let totalPoints = 0;
+                        if(subhIdx !== -1) totalPoints += parseInt(vals[subhIdx] || 0);
+                        if(zuhrIdx !== -1) totalPoints += parseInt(vals[zuhrIdx] || 0);
+                        if(asrIdx !== -1) totalPoints += parseInt(vals[asrIdx] || 0);
+                        if(magribIdx !== -1) totalPoints += parseInt(vals[magribIdx] || 0);
+                        if(ishaIdx !== -1) totalPoints += parseInt(vals[ishaIdx] || 0);
+                        const studentName = vals[nameIdx];
+                        const studentClassRaw = (classIdxActual !== -1) ? vals[classIdxActual] : cls;
+                        allRecords.push({ name: studentName, class: studentClassRaw, points: totalPoints });
+                    }
+                }
+            } catch(err) { console.warn(`Error fetching class ${cls}`, err); }
+        }
+        // Aggregate by student name+class
+        const aggregated = new Map(); // key: name_class
+        for(const rec of allRecords) {
+            const key = `${rec.name}_${rec.class}`;
+            if(aggregated.has(key)) aggregated.set(key, aggregated.get(key) + rec.points);
+            else aggregated.set(key, rec.points);
+        }
+        const rankingArray = Array.from(aggregated.entries()).map(([key, points]) => {
+            const [name, cls] = key.split('_');
+            return { name, class: cls, points };
+        });
+        rankingArray.sort((a,b)=>b.points - a.points);
+        const tbody = document.getElementById('rankingBody');
+        if(rankingArray.length===0) { tbody.innerHTML='<tr><td colspan="5" style="text-align:center;">No records found for this month</td></tr>'; return; }
+        let html = '';
+        rankingArray.forEach((student, idx) => {
+            html += `<tr><td><span class="rank-badge">${idx+1}</span></td><td><i class="fas fa-user"></i> ${escapeHtml(student.name)}</td><td>Class ${student.class}</td><td><strong>${student.points}</strong> pts</td><td>${Math.round(student.points/10)}/10 prayers avg</td></tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+
+    // Populate month dropdown (last 12 months including current)
+    function populateMonthDropdown() {
+        const select = document.getElementById('monthSelect');
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth(); // 0-index
+        select.innerHTML = '';
+        for(let i=-6; i<=6; i++) { // show last 6 months and next 6 months? but better: past 12 months and future 3
+            const d = new Date(currentYear, currentMonth + i, 1);
+            const y = d.getFullYear();
+            const m = d.getMonth()+1;
+            const val = `${y}-${m.toString().padStart(2,'0')}`;
+            const label = d.toLocaleDateString('en-US', { month:'long', year:'numeric' });
+            const opt = document.createElement('option');
+            opt.value = val;
+            opt.textContent = label;
+            if(i===0) opt.selected = true;
+            select.appendChild(opt);
+        }
+        select.addEventListener('change', () => loadMonthlyRankingsForCurrentSelection());
+    }
+
+    // On dashboard shown, load rankings for current month
+    async function refreshRankingsOnDashboard() { if(document.getElementById('dashboardPage') && !document.getElementById('dashboardPage').classList.contains('hidden')) await loadMonthlyRankingsForCurrentSelection(); }
+
+    window.logout = function() {
+        currentUser=null; currentClassSheet=null;
+        document.getElementById('loginForm').reset(); resetPrayerForm();
+        document.getElementById('studentName').innerHTML='<option value="" disabled selected>-- First Select Class --</option>';
+        document.getElementById('studentClass').value='';
+        document.getElementById('dashboardPage').classList.add('hidden');
+        document.getElementById('loginPage').classList.remove('hidden');
+    };
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        const today = new Date();
+        currentDate = today.toISOString().split('T')[0];
+        document.getElementById('globalDateDisplay').innerHTML = `<i class="far fa-calendar-alt"></i> ${today.toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })}`;
+        initializePrayerOptions();
+        document.getElementById('loginForm').addEventListener('submit', login);
+        document.getElementById('prayerForm').addEventListener('submit', submitPrayerForm);
+        document.getElementById('studentClass').addEventListener('change', filterNamesByClass);
+        populateMonthDropdown();
+        await loadUsersFromCSV();
+        // delegate prayer options
+        document.addEventListener('click', (e) => {
+            const opt = e.target.closest('.prayer-option');
+            if(!opt) return;
+            const container = opt.closest('.prayer-options');
+            if(!container) return;
+            const prayer = container.dataset.prayer;
+            container.querySelectorAll('.prayer-option').forEach(o=>o.classList.remove('selected'));
+            opt.classList.add('selected');
+            if(prayer) document.getElementById(prayer).value = opt.dataset.value;
+        });
+        // On any dashboard shown, reload ranking
+        const observer = new MutationObserver(()=>{ if(!document.getElementById('dashboardPage').classList.contains('hidden')) loadMonthlyRankingsForCurrentSelection(); });
+        observer.observe(document.getElementById('dashboardPage'), { attributes: true, attributeFilter: ['class'] });
+    });
+</script>
+</body>
+</html>
