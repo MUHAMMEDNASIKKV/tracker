@@ -9,6 +9,8 @@
 let currentUser = null;
 let currentClassSheet = null;
 let currentDate = null;
+let usersDataCache = null; // Cache for user data
+let isLoadingUsers = false; // Prevent multiple simultaneous loads
 
 // Google Sheets CSV URL for user credentials
 const USER_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=0&single=true&output=csv";
@@ -26,6 +28,9 @@ const CLASS_URLS = {
     9: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1743514473&single=true&output=csv",
     10: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=820085037&single=true&output=csv"
 };
+
+// Cache for submission checks to prevent repeated API calls
+const submissionCache = new Map();
 
 // =============================
 // 📊 Google Sheets API Configuration
@@ -79,10 +84,34 @@ class GoogleSheetsAPI {
 const api = new GoogleSheetsAPI();
 
 // =============================
-// 📥 Load User Data from CSV
+// 📥 Load User Data from CSV (with caching)
 // =============================
-async function loadUsersFromCSV() {
+async function loadUsersFromCSV(forceReload = false) {
+    // Return cached data if available and not forcing reload
+    if (!forceReload && usersDataCache) {
+        console.log('Using cached user data');
+        return usersDataCache;
+    }
+    
+    // Prevent multiple simultaneous loads
+    if (isLoadingUsers) {
+        console.log('Already loading users, waiting...');
+        // Wait for the current load to complete
+        await new Promise(resolve => {
+            const checkInterval = setInterval(() => {
+                if (!isLoadingUsers) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 100);
+        });
+        return usersDataCache;
+    }
+    
+    isLoadingUsers = true;
+    
     try {
+        console.log('Loading users from CSV...');
         const response = await fetch(USER_CSV_URL);
         const csvText = await response.text();
         
@@ -139,17 +168,31 @@ async function loadUsersFromCSV() {
             }
         }
         
+        // Cache the data
+        usersDataCache = users;
+        console.log(`Loaded ${users.length} users successfully`);
         return users;
     } catch (error) {
         console.error('Error loading users from CSV:', error);
-        return [];
+        return usersDataCache || [];
+    } finally {
+        isLoadingUsers = false;
     }
 }
 
 // =============================
-// 🔍 Check if student already submitted today
+// 🔍 Check if student already submitted today (with caching)
 // =============================
 async function hasStudentSubmittedToday(studentClass, studentName, date) {
+    // Create cache key
+    const cacheKey = `${studentClass}_${studentName}_${date}`;
+    
+    // Check cache first
+    if (submissionCache.has(cacheKey)) {
+        console.log('Using cached submission check for:', cacheKey);
+        return submissionCache.get(cacheKey);
+    }
+    
     try {
         // Get the class-specific CSV URL
         const classUrl = CLASS_URLS[parseInt(studentClass)];
@@ -158,12 +201,17 @@ async function hasStudentSubmittedToday(studentClass, studentName, date) {
             return false;
         }
         
+        console.log(`Checking submission for ${studentName} in class ${studentClass} on ${date}`);
+        
         const response = await fetch(classUrl);
         const csvText = await response.text();
         
         // Parse CSV
         const rows = csvText.split('\n');
-        if (rows.length < 2) return false;
+        if (rows.length < 2) {
+            submissionCache.set(cacheKey, false);
+            return false;
+        }
         
         // Get headers from first row
         const headers = rows[0].split(',');
@@ -206,11 +254,13 @@ async function hasStudentSubmittedToday(studentClass, studentName, date) {
             const recordName = values[nameIndex];
             
             if (recordDate === date && recordName === studentName) {
-                return true; // Already submitted today
+                submissionCache.set(cacheKey, true);
+                return true;
             }
         }
         
-        return false; // No submission found
+        submissionCache.set(cacheKey, false);
+        return false;
     } catch (error) {
         console.error('Error checking submission status:', error);
         return false;
@@ -221,9 +271,24 @@ async function hasStudentSubmittedToday(studentClass, studentName, date) {
 // 🔑 Login Functions
 // =============================
 
+// Preload user data as soon as possible
+async function preloadUserData() {
+    await loadUsersFromCSV();
+}
+
 // Load student names on page load
 document.addEventListener('DOMContentLoaded', async function() {
-    await loadStudentNames();
+    // Show loading indicator on name dropdown
+    const nameSelect = document.getElementById('studentName');
+    nameSelect.innerHTML = '<option value="" disabled selected>Loading students...</option>';
+    
+    // Preload user data in background
+    preloadUserData().then(() => {
+        // Once loaded, update the dropdown message
+        if (nameSelect.value === 'Loading students...') {
+            nameSelect.innerHTML = '<option value="" disabled selected>-- First Select Class --</option>';
+        }
+    });
     
     // Set current date
     const today = new Date();
@@ -249,15 +314,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('studentClass').addEventListener('change', filterNamesByClass);
 });
 
-async function loadStudentNames() {
-    const users = await loadUsersFromCSV();
-    window.allUsers = users; // Store globally for filtering
-    
-    const nameSelect = document.getElementById('studentName');
-    nameSelect.innerHTML = '<option value="" disabled selected>-- First Select Class --</option>';
-}
-
-function filterNamesByClass() {
+// Optimized function to filter names by class with instant loading
+async function filterNamesByClass() {
     const selectedClass = document.getElementById('studentClass').value;
     const nameSelect = document.getElementById('studentName');
     const passwordInput = document.getElementById('password');
@@ -271,23 +329,47 @@ function filterNamesByClass() {
         return;
     }
     
-    const filteredUsers = (window.allUsers || []).filter(user => user.class === selectedClass);
+    // Show loading state
+    nameSelect.innerHTML = '<option value="" disabled selected>Loading students...</option>';
+    nameSelect.disabled = true;
     
-    if (filteredUsers.length === 0) {
-        nameSelect.innerHTML = '<option value="" disabled selected>-- No students found in this class --</option>';
-        nameSelect.disabled = false;
-    } else {
-        nameSelect.innerHTML = '<option value="" disabled selected>-- Select Student Name --</option>';
-        filteredUsers.forEach(user => {
-            const option = document.createElement('option');
-            option.value = user.name;
-            option.textContent = `${user.name}`;
-            option.dataset.class = user.class;
-            option.dataset.password = user.password;
-            nameSelect.appendChild(option);
-        });
-        nameSelect.disabled = false;
+    // Ensure user data is loaded
+    if (!usersDataCache) {
+        await loadUsersFromCSV();
     }
+    
+    // Use requestAnimationFrame for smoother UI update
+    requestAnimationFrame(() => {
+        const filteredUsers = (usersDataCache || []).filter(user => user.class === selectedClass);
+        
+        if (filteredUsers.length === 0) {
+            nameSelect.innerHTML = '<option value="" disabled selected>-- No students found in this class --</option>';
+            nameSelect.disabled = false;
+        } else {
+            // Use DocumentFragment for faster DOM manipulation
+            const fragment = document.createDocumentFragment();
+            const defaultOption = document.createElement('option');
+            defaultOption.value = "";
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            defaultOption.textContent = "-- Select Student Name --";
+            fragment.appendChild(defaultOption);
+            
+            filteredUsers.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.name;
+                option.textContent = `${user.name}`;
+                option.dataset.class = user.class;
+                option.dataset.password = user.password;
+                fragment.appendChild(option);
+            });
+            
+            // Clear and append all at once
+            nameSelect.innerHTML = '';
+            nameSelect.appendChild(fragment);
+            nameSelect.disabled = false;
+        }
+    });
 }
 
 async function login(event) {
@@ -483,7 +565,7 @@ function showSuccessAlertWithLogout(message, onComplete) {
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="custom-alert-title">Successfully Submitted!</div>
-            <div class="custom-alert-message">${message}</div>
+            <div class="custom-alert-message">${message.replace(/\n/g, '<br>')}</div>
             <button class="custom-alert-btn" id="customAlertOkBtn">OK</button>
         </div>
     `;
@@ -529,17 +611,16 @@ async function submitPrayerForm(event) {
         const timeStr = now.toLocaleTimeString('en-GB');
         
         // Prepare row data: date, time, name, class, subh, zuhr, asr, magrib, isha
-        // Values are numeric: 2 = Adā', 1 = Qaḍā', 0 = No
         const rowData = [
             dateStr, 
             timeStr, 
             currentUser.name, 
             currentUser.class, 
-            subh,   // This will be "2", "1", or "0"
-            zuhr,   // This will be "2", "1", or "0"
-            asr,    // This will be "2", "1", or "0"
-            magrib, // This will be "2", "1", or "0"
-            isha    // This will be "2", "1", or "0"
+            subh,
+            zuhr,
+            asr,
+            magrib,
+            isha
         ];
         
         console.log('Submitting prayer data:', {
@@ -558,6 +639,10 @@ async function submitPrayerForm(event) {
         const result = await api.addPrayerRecord(currentClassSheet, rowData);
         
         if (result && result.success) {
+            // Clear submission cache for this student
+            const cacheKey = `${currentUser.class}_${currentUser.name}_${dateStr}`;
+            submissionCache.set(cacheKey, true);
+            
             // Get prayer status texts
             const subhText = getPrayerStatusText(subh);
             const zuhrText = getPrayerStatusText(zuhr);
@@ -594,7 +679,10 @@ async function submitPrayerForm(event) {
                 tempMsg.className = 'error-message';
                 tempMsg.style.marginTop = '1rem';
                 tempMsg.style.marginBottom = '0';
-                tempMsg.innerHTML = `<i class="fas fa-info-circle"></i><span>You have submitted today's prayer status. You can submit again tomorrow.</span>`;
+                tempMsg.style.backgroundColor = '#ecfdf5';
+                tempMsg.style.borderColor = '#059669';
+                tempMsg.style.color = '#065f46';
+                tempMsg.innerHTML = `<i class="fas fa-info-circle"></i><span>✓ You have submitted today's prayer status. You can submit again tomorrow.</span>`;
                 
                 const loginContainer = document.querySelector('.login-container');
                 const existingMsg = loginContainer.querySelector('.temp-info-message');
@@ -660,3 +748,4 @@ console.log('%c🌙 Tharbiyya - 5 Daily Prayers Tracker 🌙', 'color: #059669; 
 console.log('%cPrayer Values: Adā\' = 2, Qaḍā\' = 1, No = 0', 'color: #1f2937; font-size: 12px;');
 console.log('%cPrayer Order: Subh (Fajr) → Zuhr → Asr → Magrib → Isha', 'color: #1f2937; font-size: 12px;');
 console.log('%c⚠️ Students can only submit ONCE per day!', 'color: #dc2626; font-size: 12px; font-weight: bold;');
+console.log('%c⚡ Optimized for fast loading with caching', 'color: #059669; font-size: 12px; font-weight: bold;');
