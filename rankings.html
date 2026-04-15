@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
-    <title>Student Rankings</title>
+    <title>Student Rankings · Tharbiyya</title>
     
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -109,7 +109,7 @@
             font-size: 1.75rem;
         }
         
-        .date-range-selector {
+        .date-range-selector, .type-selector-wrapper {
             display: flex;
             align-items: center;
             gap: 0.75rem;
@@ -117,6 +117,23 @@
             padding: 0.5rem 1rem;
             border-radius: 40px;
             flex-wrap: wrap;
+        }
+        
+        .type-selector-wrapper {
+            background: transparent;
+            padding: 0;
+        }
+        
+        .type-select {
+            padding: 0.5rem 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 40px;
+            background: white;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #1f2937;
+            outline: none;
+            cursor: pointer;
         }
         
         .date-range-selector label {
@@ -145,7 +162,7 @@
             box-shadow: 0 0 0 2px rgba(5, 150, 105, 0.1);
         }
         
-        .apply-btn {
+        .apply-btn, .refresh-btn {
             background: #059669;
             color: white;
             border: none;
@@ -163,12 +180,7 @@
         
         .refresh-btn {
             background: #f3f4f6;
-            border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 40px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            transition: all 0.2s ease;
+            color: #1f2937;
         }
         
         .refresh-btn:hover {
@@ -277,15 +289,83 @@
             margin-bottom: 1rem;
         }
         
+        .eye-btn {
+            background: none;
+            border: none;
+            color: #6b7280;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px 8px;
+            border-radius: 20px;
+            transition: all 0.2s;
+        }
+        .eye-btn:hover {
+            background: #e5e7eb;
+            color: #059669;
+        }
+        
+        /* Modal */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 1rem;
+        }
+        .modal-card {
+            background: white;
+            border-radius: 24px;
+            max-width: 1000px;
+            width: 100%;
+            max-height: 85vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        .modal-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .modal-body {
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        .submission-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+        }
+        .submission-table th {
+            background: #f3f4f6;
+            padding: 0.6rem;
+            text-align: center;
+        }
+        .submission-table td {
+            padding: 0.5rem;
+            border-bottom: 1px solid #e5e7eb;
+            text-align: center;
+        }
+        
         @media (max-width: 768px) {
             .main-container { padding: 1rem; }
             .ranking-card { padding: 1rem; }
             .ranking-table th, .ranking-table td { padding: 0.75rem 0.5rem; font-size: 0.8rem; }
             .ranking-title { font-size: 1.2rem; }
             .points-cell { font-size: 1rem; }
-            .date-range-selector { padding: 0.5rem; gap: 0.5rem; }
-            .date-input { font-size: 0.7rem; padding: 0.3rem 0.6rem; }
-            .apply-btn, .refresh-btn { font-size: 0.7rem; padding: 0.3rem 0.8rem; }
         }
         
         .points-legend {
@@ -299,80 +379,48 @@
             gap: 1.5rem;
             font-size: 0.75rem;
         }
-        
         .legend-item {
             display: inline-flex;
             align-items: center;
             gap: 0.5rem;
         }
-        
         .legend-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 4px;
+            width: 12px; height: 12px; border-radius: 4px;
         }
-        
         .legend-color.ada { background: #059669; }
         .legend-color.qala { background: #3b82f6; }
         .legend-color.no { background: #ef4444; }
     </style>
 </head>
 <body>
-    <div class="nav-container">
-        <div class="max-w-[1200px] mx-auto">
-            <div class="nav-links" id="navLinks">
-                <button class="nav-btn active" data-page="custom">
-                    <i class="fas fa-calendar-alt mr-2"></i>Custom Date Range
-                </button>
-                <button class="nav-btn" data-page="monthly">
-                    <i class="fas fa-calendar-week mr-2"></i>Monthly Rankings
-                </button>
-                <button class="nav-btn" data-page="class-1">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 1
-                </button>
-                <button class="nav-btn" data-page="class-2">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 2
-                </button>
-                <button class="nav-btn" data-page="class-3">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 3
-                </button>
-                <button class="nav-btn" data-page="class-4">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 4
-                </button>
-                <button class="nav-btn" data-page="class-5">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 5
-                </button>
-                <button class="nav-btn" data-page="class-6">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 6
-                </button>
-                <button class="nav-btn" data-page="class-7">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 7
-                </button>
-                <button class="nav-btn" data-page="class-8">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 8
-                </button>
-                <button class="nav-btn" data-page="class-9">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 9
-                </button>
-                <button class="nav-btn" data-page="class-10">
-                    <i class="fas fa-graduation-cap mr-2"></i>Class 10
-                </button>
-            </div>
+<div class="nav-container">
+    <div class="max-w-[1200px] mx-auto">
+        <div class="nav-links" id="navLinks">
+            <button class="nav-btn active" data-page="custom">
+                <i class="fas fa-calendar-alt mr-2"></i>Custom Date Range
+            </button>
+            <!-- Monthly removed, only class buttons remain -->
+            <button class="nav-btn" data-page="class-1"><i class="fas fa-graduation-cap mr-2"></i>Class 1</button>
+            <button class="nav-btn" data-page="class-2"><i class="fas fa-graduation-cap mr-2"></i>Class 2</button>
+            <button class="nav-btn" data-page="class-3"><i class="fas fa-graduation-cap mr-2"></i>Class 3</button>
+            <button class="nav-btn" data-page="class-4"><i class="fas fa-graduation-cap mr-2"></i>Class 4</button>
+            <button class="nav-btn" data-page="class-5"><i class="fas fa-graduation-cap mr-2"></i>Class 5</button>
+            <button class="nav-btn" data-page="class-6"><i class="fas fa-graduation-cap mr-2"></i>Class 6</button>
+            <button class="nav-btn" data-page="class-7"><i class="fas fa-graduation-cap mr-2"></i>Class 7</button>
+            <button class="nav-btn" data-page="class-8"><i class="fas fa-graduation-cap mr-2"></i>Class 8</button>
+            <button class="nav-btn" data-page="class-9"><i class="fas fa-graduation-cap mr-2"></i>Class 9</button>
+            <button class="nav-btn" data-page="class-10"><i class="fas fa-graduation-cap mr-2"></i>Class 10</button>
         </div>
     </div>
-    
-    <div class="main-container" id="mainContent">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-        </div>
-    </div>
-    
-    <script>
-        // ============================================
-        // THARBIYYA - Ranking System
-        // Custom Date Range Selector
-        // ============================================
-        
+</div>
+
+<div class="main-container" id="mainContent">
+    <div class="loading-spinner"><div class="spinner"></div></div>
+</div>
+
+<script>
+    (function(){
+        // ---------- CONFIG ----------
         const CLASS_URLS = {
             1: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=489329760&single=true&output=csv",
             2: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=428928738&single=true&output=csv",
@@ -385,584 +433,402 @@
             9: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=1743514473&single=true&output=csv",
             10: "https://docs.google.com/spreadsheets/d/e/2PACX-1vSSOGrONCLJ53Hf3jKE7VA7ro-yZmlzc_lFy9CxKvL_8VBuXRQp7hZxLjUpy0wmf28TYAn2HQ-uaV5r/pub?gid=820085037&single=true&output=csv"
         };
-        
-        const PRAYER_COLUMNS = ["subh", "zuhr", "asr", "magrib", "isha"];
+
+        const FARD_COLS = ["subh", "zuhr", "asr", "magrib", "isha"];
+        const RAWATIB_COLS = ["b-subh", "b-zuhr", "a-zuhr", "b-asr", "a-magrib", "a-isha"];
+        const ALL_PRAYER_COLS = [...FARD_COLS, ...RAWATIB_COLS];
+
+        // ---------- GLOBAL STATE ----------
+        let cachedData = {};            // classNum -> array of raw rows (with original fields)
         let currentPage = "custom";
-        let cachedData = {};
-        let isLoading = false;
         let currentStartDate = null;
         let currentEndDate = null;
-        
-        async function fetchCSV(url) {
-            try {
-                const response = await fetch(url);
-                const text = await response.text();
-                return parseCSV(text);
-            } catch (error) {
-                console.error(`Error fetching ${url}:`, error);
-                return [];
-            }
-        }
-        
+        let currentRankingType = "grand"; // "fard", "rawatib", "grand"
+        let isLoading = false;
+
+        // ---------- UTILS ----------
         function parseCSV(csvText) {
             const rows = [];
             const lines = csvText.split('\n');
             if (lines.length === 0) return rows;
-            
             const headers = lines[0].split(',').map(h => h.replace(/^"|"$/g, '').trim().toLowerCase());
-            
             for (let i = 1; i < lines.length; i++) {
                 if (lines[i].trim() === '') continue;
-                
                 const values = [];
                 let inQuote = false;
-                let currentValue = '';
-                
+                let current = '';
                 for (let char of lines[i]) {
-                    if (char === '"') {
-                        inQuote = !inQuote;
-                    } else if (char === ',' && !inQuote) {
-                        values.push(currentValue.trim());
-                        currentValue = '';
-                    } else {
-                        currentValue += char;
-                    }
+                    if (char === '"') inQuote = !inQuote;
+                    else if (char === ',' && !inQuote) { values.push(current.trim()); current = ''; }
+                    else current += char;
                 }
-                values.push(currentValue.trim());
-                
-                const cleanValues = values.map(v => v.replace(/^"|"$/g, ''));
-                
+                values.push(current.trim());
+                const clean = values.map(v => v.replace(/^"|"$/g, ''));
                 const row = {};
-                headers.forEach((header, index) => {
-                    row[header] = cleanValues[index] || '';
-                });
-                
+                headers.forEach((h, idx) => { row[h] = clean[idx] || ''; });
                 rows.push(row);
             }
-            
             return rows;
         }
-        
-        function calculateDailyPoints(record) {
-            let dailyTotal = 0;
-            for (const prayer of PRAYER_COLUMNS) {
-                const value = record[prayer];
-                if (value && value !== '') {
-                    const points = parseFloat(value);
-                    if (!isNaN(points)) {
-                        dailyTotal += points;
-                    }
+
+        async function fetchCSV(url) {
+            const resp = await fetch(url);
+            const text = await resp.text();
+            return parseCSV(text);
+        }
+
+        function calculatePoints(record, type) {
+            let total = 0;
+            let columns = type === 'fard' ? FARD_COLS : (type === 'rawatib' ? RAWATIB_COLS : ALL_PRAYER_COLS);
+            for (let col of columns) {
+                const val = record[col];
+                if (val && val !== '') {
+                    const pts = parseFloat(val);
+                    if (!isNaN(pts)) total += pts;
                 }
             }
-            return dailyTotal;
+            return total;
         }
-        
-        function formatDate(date) {
-            return date.toISOString().split('T')[0];
+
+        function formatDisplayDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
         }
-        
-        // Get rankings for custom date range
-        function getCustomRangeRankings(allData, startDate, endDate) {
-            const startDateStr = startDate;
-            const endDateStr = endDate;
-            
-            // Collect all records within date range
-            const rangeRecords = [];
-            
-            for (const classNum in allData) {
-                const records = allData[classNum];
-                for (const record of records) {
-                    const recordDate = record.date;
-                    if (recordDate && recordDate >= startDateStr && recordDate <= endDateStr) {
-                        rangeRecords.push({
-                            ...record,
-                            class: classNum
-                        });
-                    }
-                }
-            }
-            
-            // Calculate points for each student
-            const studentPoints = {};
-            
-            for (const record of rangeRecords) {
-                const name = record.name;
-                if (!name) continue;
-                
-                const dailyPoints = calculateDailyPoints(record);
-                
-                if (!studentPoints[name]) {
-                    studentPoints[name] = {
-                        name: name,
-                        class: record.class,
-                        totalPoints: 0,
-                        daysActive: new Set()
-                    };
-                }
-                
-                studentPoints[name].totalPoints += dailyPoints;
-                studentPoints[name].daysActive.add(record.date);
-            }
-            
-            let studentArray = Object.values(studentPoints);
-            studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
-            
-            studentArray = studentArray.map((student, index) => ({
-                ...student,
-                rank: index + 1,
-                daysActive: student.daysActive.size
-            }));
-            
-            return {
-                rankings: studentArray.slice(0, 10),
-                allRankings: studentArray,
-                startDate: startDateStr,
-                endDate: endDateStr,
-                totalStudents: studentArray.length,
-                totalDays: Math.ceil((new Date(endDateStr) - new Date(startDateStr)) / (1000 * 60 * 60 * 24)) + 1
-            };
-        }
-        
-        function getMonthlyRankings(allData) {
-            const today = new Date();
-            const currentYear = today.getFullYear();
-            const currentMonth = today.getMonth();
-            
-            const startDate = new Date(currentYear, currentMonth, 1);
-            const endDate = new Date(currentYear, currentMonth + 1, 0);
-            const startDateStr = startDate.toISOString().split('T')[0];
-            const endDateStr = endDate.toISOString().split('T')[0];
-            
-            const monthlyRecords = [];
-            
-            for (const classNum in allData) {
-                const records = allData[classNum];
-                for (const record of records) {
-                    const recordDate = record.date;
-                    if (recordDate && recordDate >= startDateStr && recordDate <= endDateStr) {
-                        monthlyRecords.push({
-                            ...record,
-                            class: classNum
-                        });
-                    }
-                }
-            }
-            
-            const studentPoints = {};
-            
-            for (const record of monthlyRecords) {
-                const name = record.name;
-                if (!name) continue;
-                
-                const dailyPoints = calculateDailyPoints(record);
-                
-                if (!studentPoints[name]) {
-                    studentPoints[name] = {
-                        name: name,
-                        class: record.class,
-                        totalPoints: 0,
-                        daysActive: new Set()
-                    };
-                }
-                
-                studentPoints[name].totalPoints += dailyPoints;
-                studentPoints[name].daysActive.add(record.date);
-            }
-            
-            let studentArray = Object.values(studentPoints);
-            studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
-            
-            studentArray = studentArray.map((student, index) => ({
-                ...student,
-                rank: index + 1,
-                daysActive: student.daysActive.size
-            }));
-            
-            const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-            
-            return {
-                rankings: studentArray.slice(0, 10),
-                allRankings: studentArray,
-                month: monthNames[currentMonth],
-                year: currentYear,
-                startDate: startDateStr,
-                endDate: endDateStr,
-                totalStudents: studentArray.length
-            };
-        }
-        
-        function getClassRankings(classData, classNum) {
-            const studentPoints = {};
-            
-            for (const record of classData) {
-                const name = record.name;
-                if (!name) continue;
-                
-                const dailyPoints = calculateDailyPoints(record);
-                
-                if (!studentPoints[name]) {
-                    studentPoints[name] = {
-                        name: name,
-                        totalPoints: 0,
-                        daysCount: 0
-                    };
-                }
-                
-                studentPoints[name].totalPoints += dailyPoints;
-                studentPoints[name].daysCount++;
-            }
-            
-            let studentArray = Object.values(studentPoints);
-            studentArray.sort((a, b) => b.totalPoints - a.totalPoints);
-            
-            studentArray = studentArray.map((student, index) => ({
-                ...student,
-                rank: index + 1
-            }));
-            
-            return {
-                rankings: studentArray,
-                className: classNum,
-                totalStudents: studentArray.length,
-                totalSubmissions: classData.length
-            };
-        }
-        
-        function renderCustomRangeRankings(allData, startDate, endDate) {
-            if (!startDate || !endDate) {
-                // Set default dates (last 7 days)
-                const today = new Date();
-                const sevenDaysAgo = new Date(today);
-                sevenDaysAgo.setDate(today.getDate() - 6);
-                startDate = formatDate(sevenDaysAgo);
-                endDate = formatDate(today);
-                currentStartDate = startDate;
-                currentEndDate = endDate;
-            }
-            
-            const rangeData = getCustomRangeRankings(allData, startDate, endDate);
-            
-            // Format dates for display
-            const formatDisplay = (dateStr) => {
-                const date = new Date(dateStr);
-                return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-            };
-            
-            const selectorHtml = `
-                <div class="date-range-selector">
-                    <label><i class="fas fa-calendar-alt mr-1"></i>From:</label>
-                    <input type="date" id="startDate" class="date-input" value="${startDate}">
-                    <label>To:</label>
-                    <input type="date" id="endDate" class="date-input" value="${endDate}">
-                    <button class="apply-btn" onclick="applyDateRange()">
-                        <i class="fas fa-search mr-1"></i> Apply
-                    </button>
-                </div>
-            `;
-            
-            if (!rangeData.rankings || rangeData.rankings.length === 0) {
-                return `
-                    <div class="ranking-card">
-                        <div class="ranking-header">
-                            <div class="ranking-title"><i class="fas fa-calendar-alt"></i>Custom Date Range Rankings</div>
-                            ${selectorHtml}
-                        </div>
-                        <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> ${formatDisplay(startDate)} - ${formatDisplay(endDate)}</div>
-                        <div class="empty-state">
-                            <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
-                            <p>No data available for this date range</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            const statsHtml = `
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-value">${rangeData.totalStudents}</div><div class="stat-label">Active Students</div></div>
-                    <div class="stat-card"><div class="stat-value">${rangeData.rankings[0]?.totalPoints || 0}</div><div class="stat-label">Top Score</div></div>
-                    <div class="stat-card"><div class="stat-value">${rangeData.totalDays}</div><div class="stat-label">Total Days</div></div>
-                </div>
-            `;
-            
-            let tableRows = '';
-            rangeData.rankings.forEach((student) => {
-                let rankClass = '';
-                if (student.rank === 1) rankClass = 'rank-1';
-                else if (student.rank === 2) rankClass = 'rank-2';
-                else if (student.rank === 3) rankClass = 'rank-3';
-                
-                tableRows += `
-                    <tr>
-                        <td class="rank-cell"><span class="${rankClass} font-bold">#${student.rank}</span></td>
-                        <td><div class="font-medium">${escapeHtml(student.name)}</div><div class="text-xs text-gray-500">Class ${student.class}</div></td>
-                        <td class="points-cell">${student.totalPoints} pts</td>
-                        <td class="text-sm text-gray-500">${student.daysActive}/${rangeData.totalDays} days</td>
-                    </tr>
-                `;
-            });
-            
-            return `
-                <div class="ranking-card">
-                    <div class="ranking-header">
-                        <div class="ranking-title"><i class="fas fa-calendar-alt"></i>Custom Date Range Rankings (Top 10)</div>
-                        ${selectorHtml}
-                    </div>
-                    <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> ${formatDisplay(startDate)} - ${formatDisplay(endDate)}</div>
-                    ${statsHtml}
-                    <div style="overflow-x: auto;">
-                        <table class="ranking-table">
-                            <thead>
-                                <tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Active Days</th></tr>
-                            </thead>
-                            <tbody>${tableRows}</tbody>
-                        </table>
-                    </div>
-                    
-                </div>
-            `;
-        }
-        
-        function renderMonthlyRankings(allData) {
-            const monthlyData = getMonthlyRankings(allData);
-            
-            if (!monthlyData.rankings || monthlyData.rankings.length === 0) {
-                return `
-                    <div class="ranking-card">
-                        <div class="ranking-header">
-                            <div class="ranking-title"><i class="fas fa-calendar-week"></i>Monthly Rankings</div>
-                            <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
-                        </div>
-                        <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> ${monthlyData.month} ${monthlyData.year}</div>
-                        <div class="empty-state">
-                            <i class="fas fa-chart-line text-4xl mb-3 opacity-50"></i>
-                            <p>No data available for this month</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            const statsHtml = `
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-value">${monthlyData.totalStudents}</div><div class="stat-label">Active Students</div></div>
-                    <div class="stat-card"><div class="stat-value">${monthlyData.rankings[0]?.totalPoints || 0}</div><div class="stat-label">Top Score</div></div>
-                    <div class="stat-card"><div class="stat-value">${monthlyData.rankings.length}</div><div class="stat-label">Top 10 Shown</div></div>
-                </div>
-            `;
-            
-            let tableRows = '';
-            monthlyData.rankings.forEach((student) => {
-                let rankClass = '';
-                if (student.rank === 1) rankClass = 'rank-1';
-                else if (student.rank === 2) rankClass = 'rank-2';
-                else if (student.rank === 3) rankClass = 'rank-3';
-                
-                tableRows += `
-                    <tr>
-                        <td class="rank-cell"><span class="${rankClass} font-bold">#${student.rank}</span></td>
-                        <td><div class="font-medium">${escapeHtml(student.name)}</div><div class="text-xs text-gray-500">Class ${student.class}</div></td>
-                        <td class="points-cell">${student.totalPoints} pts</td>
-                        <td class="text-sm text-gray-500">${student.daysActive} days</td>
-                    </tr>
-                `;
-            });
-            
-            return `
-                <div class="ranking-card">
-                    <div class="ranking-header">
-                        <div class="ranking-title"><i class="fas fa-calendar-week"></i>Monthly Rankings - ${monthlyData.month} ${monthlyData.year} (Top 10)</div>
-                        <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
-                    </div>
-                    <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i> ${monthlyData.startDate} - ${monthlyData.endDate}</div>
-                    ${statsHtml}
-                    <div style="overflow-x: auto;">
-                        <table class="ranking-table">
-                            <thead><tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Active Days</th></tr></thead>
-                            <tbody>${tableRows}</tbody>
-                        </table>
-                    </div>
-                    
-                </div>
-            `;
-        }
-        
-        function renderClassRankings(classData, classNum) {
-            const classRankings = getClassRankings(classData, classNum);
-            
-            if (!classRankings.rankings || classRankings.rankings.length === 0) {
-                return `
-                    <div class="ranking-card">
-                        <div class="ranking-header">
-                            <div class="ranking-title"><i class="fas fa-graduation-cap"></i>Class ${classNum} Rankings</div>
-                            <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
-                        </div>
-                        <div class="empty-state">
-                            <i class="fas fa-users text-4xl mb-3 opacity-50"></i>
-                            <p>No data available for Class ${classNum}</p>
-                        </div>
-                    </div>
-                `;
-            }
-            
-            const statsHtml = `
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-value">${classRankings.totalStudents}</div><div class="stat-label">Total Students</div></div>
-                    <div class="stat-card"><div class="stat-value">${classRankings.rankings[0]?.totalPoints || 0}</div><div class="stat-label">Top Score</div></div>
-                    <div class="stat-card"><div class="stat-value">${classRankings.totalSubmissions}</div><div class="stat-label">Total Submissions</div></div>
-                </div>
-            `;
-            
-            let tableRows = '';
-            classRankings.rankings.forEach((student) => {
-                let rankClass = '';
-                if (student.rank === 1) rankClass = 'rank-1';
-                else if (student.rank === 2) rankClass = 'rank-2';
-                else if (student.rank === 3) rankClass = 'rank-3';
-                
-                tableRows += `
-                    <tr>
-                        <td class="rank-cell"><span class="${rankClass} font-bold">#${student.rank}</span></td>
-                        <td><div class="font-medium">${escapeHtml(student.name)}</div></td>
-                        <td class="points-cell">${student.totalPoints} pts</td>
-                        <td class="text-sm text-gray-500">${student.daysCount} days</td>
-                    </tr>
-                `;
-            });
-            
-            return `
-                <div class="ranking-card">
-                    <div class="ranking-header">
-                        <div class="ranking-title"><i class="fas fa-graduation-cap"></i>Class ${classNum} Rankings (All Time)</div>
-                        <button class="refresh-btn" onclick="refreshData()"><i class="fas fa-sync-alt"></i> Refresh</button>
-                    </div>
-                    ${statsHtml}
-                    <div style="overflow-x: auto;">
-                        <table class="ranking-table">
-                            <thead><tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Active Days</th></tr></thead>
-                            <tbody>${tableRows}</tbody>
-                        </table>
-                    </div>
-                    
-                </div>
-            `;
-        }
-        
+
         function escapeHtml(text) {
             if (!text) return '';
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-        
-        async function loadPage(page, startDate = null, endDate = null) {
-            if (isLoading) return;
-            
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
-            isLoading = true;
-            
-            try {
-                if (Object.keys(cachedData).length === 0) {
-                    await loadAllClassData();
+
+        // ---------- DATA LOADING ----------
+        async function loadAllClassData() {
+            const all = {};
+            const proms = [];
+            for (let i=1; i<=10; i++) {
+                proms.push(fetchCSV(CLASS_URLS[i]).then(data => { all[i] = data; }).catch(e => { console.warn(e); all[i] = []; }));
+            }
+            await Promise.all(proms);
+            cachedData = all;
+        }
+
+        // ---------- RANKING CALCULATION (with type) ----------
+        function getCustomRangeRankings(allData, startDate, endDate, type) {
+            const records = [];
+            for (let cls in allData) {
+                for (let rec of allData[cls]) {
+                    const d = rec.date;
+                    if (d && d >= startDate && d <= endDate) {
+                        records.push({ ...rec, class: cls });
+                    }
                 }
-                
-                let html = '';
-                if (page === 'custom') {
-                    html = renderCustomRangeRankings(cachedData, startDate, endDate);
-                } else if (page === 'monthly') {
-                    html = renderMonthlyRankings(cachedData);
-                } else if (page.startsWith('class-')) {
-                    const classNum = parseInt(page.split('-')[1]);
-                    const classData = cachedData[classNum] || [];
-                    html = renderClassRankings(classData, classNum);
+            }
+            const studentMap = new Map(); // key: name
+            for (let rec of records) {
+                const name = rec.name;
+                if (!name) continue;
+                const pts = calculatePoints(rec, type);
+                if (!studentMap.has(name)) {
+                    studentMap.set(name, {
+                        name, class: rec.class,
+                        totalPoints: 0, daysActive: new Set(),
+                        rawRecords: []  // store for details
+                    });
                 }
-                
-                mainContent.innerHTML = html;
-            } catch (error) {
-                console.error('Error loading page:', error);
-                mainContent.innerHTML = `
-                    <div class="ranking-card">
-                        <div class="empty-state">
-                            <i class="fas fa-exclamation-triangle text-4xl mb-3 text-red-500"></i>
-                            <p>Error loading data. Please try again.</p>
-                            <button class="refresh-btn mt-3" onclick="refreshData()">Try Again</button>
+                const entry = studentMap.get(name);
+                entry.totalPoints += pts;
+                entry.daysActive.add(rec.date);
+                entry.rawRecords.push(rec); // keep all submissions
+            }
+            let arr = Array.from(studentMap.values()).map(s => ({
+                ...s,
+                daysActive: s.daysActive.size
+            }));
+            arr.sort((a,b) => b.totalPoints - a.totalPoints);
+            arr = arr.map((s, idx) => ({ ...s, rank: idx+1 }));
+            const totalDays = Math.ceil((new Date(endDate) - new Date(startDate))/(1000*60*60*24)) + 1;
+            return { rankings: arr.slice(0,10), allRankings: arr, startDate, endDate, totalStudents: arr.length, totalDays };
+        }
+
+        function getClassRankings(classData, classNum, type) {
+            const studentMap = new Map();
+            for (let rec of classData) {
+                const name = rec.name;
+                if (!name) continue;
+                const pts = calculatePoints(rec, type);
+                if (!studentMap.has(name)) {
+                    studentMap.set(name, { name, totalPoints:0, daysCount:0, rawRecords:[] });
+                }
+                const e = studentMap.get(name);
+                e.totalPoints += pts;
+                e.daysCount++;
+                e.rawRecords.push(rec);
+            }
+            let arr = Array.from(studentMap.values());
+            arr.sort((a,b) => b.totalPoints - a.totalPoints);
+            arr = arr.map((s,idx)=>({...s, rank:idx+1}));
+            return { rankings: arr, className: classNum, totalStudents: arr.length, totalSubmissions: classData.length };
+        }
+
+        // ---------- MODAL FOR DETAILS ----------
+        function showStudentDetails(student, contextData) {
+            // student.rawRecords contains all submissions
+            const records = student.rawRecords || [];
+            if (!records.length) {
+                alert("No submission details available.");
+                return;
+            }
+            // sort by date desc
+            const sorted = [...records].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+            const headers = ['Date', 'Time', 'Name', 'Class', ...ALL_PRAYER_COLS];
+            
+            let rowsHtml = '';
+            sorted.forEach(r => {
+                let tds = '';
+                tds += `<td>${escapeHtml(r.date || '')}</td>`;
+                tds += `<td>${escapeHtml(r.time || '')}</td>`;
+                tds += `<td>${escapeHtml(r.name || '')}</td>`;
+                tds += `<td>${escapeHtml(r.class || '')}</td>`;
+                ALL_PRAYER_COLS.forEach(col => { tds += `<td>${escapeHtml(r[col] || '')}</td>`; });
+                rowsHtml += `<tr>${tds}</tr>`;
+            });
+
+            const modalHtml = `
+                <div class="modal-overlay" id="detailModal">
+                    <div class="modal-card">
+                        <div class="modal-header">
+                            <h3 style="font-weight:600;"><i class="fas fa-user-graduate mr-2" style="color:#059669;"></i>${escapeHtml(student.name)} (Class ${escapeHtml(student.class)})</h3>
+                            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+                        </div>
+                        <div class="modal-body">
+                            <div style="overflow-x:auto;">
+                                <table class="submission-table">
+                                    <thead><tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead>
+                                    <tbody>${rowsHtml}</tbody>
+                                </table>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-3">Total submissions: ${sorted.length}</p>
                         </div>
                     </div>
-                `;
-            } finally {
-                isLoading = false;
-            }
+                </div>
+            `;
+            const existing = document.getElementById('detailModal');
+            if(existing) existing.remove();
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
         }
-        
-        async function loadAllClassData() {
-            const allData = {};
-            const promises = [];
-            
-            for (let i = 1; i <= 10; i++) {
-                const url = CLASS_URLS[i];
-                if (url) {
-                    promises.push(
-                        fetchCSV(url).then(data => {
-                            allData[i] = data;
-                        }).catch(error => {
-                            console.error(`Error loading class ${i}:`, error);
-                            allData[i] = [];
-                        })
-                    );
-                }
-            }
-            
-            await Promise.all(promises);
-            cachedData = allData;
-            return allData;
-        }
-        
-        async function refreshData() {
-            cachedData = {};
-            await loadPage(currentPage);
-        }
-        
-        async function applyDateRange() {
-            const startDate = document.getElementById('startDate').value;
-            const endDate = document.getElementById('endDate').value;
-            
+
+        window.closeModal = function() {
+            const m = document.getElementById('detailModal');
+            if(m) m.remove();
+        };
+
+        // ---------- RENDER CUSTOM ----------
+        function renderCustomRange(allData, startDate, endDate, type) {
             if (!startDate || !endDate) {
-                alert('Please select both start and end dates');
-                return;
+                const today = new Date();
+                const weekAgo = new Date(today); weekAgo.setDate(today.getDate()-6);
+                startDate = weekAgo.toISOString().split('T')[0];
+                endDate = today.toISOString().split('T')[0];
+                currentStartDate = startDate; currentEndDate = endDate;
+            }
+            const range = getCustomRangeRankings(allData, startDate, endDate, type);
+            const typeLabel = type === 'fard' ? 'Fard' : (type==='rawatib' ? 'Rawatib' : 'Grand Total');
+            
+            const selector = `
+                <div style="display:flex; flex-wrap:wrap; gap:0.75rem; align-items:center;">
+                    <div class="date-range-selector">
+                        <label><i class="fas fa-calendar-alt mr-1"></i>From:</label>
+                        <input type="date" id="startDate" class="date-input" value="${startDate}">
+                        <label>To:</label>
+                        <input type="date" id="endDate" class="date-input" value="${endDate}">
+                        <button class="apply-btn" onclick="applyDateRange()"><i class="fas fa-search mr-1"></i>Apply</button>
+                    </div>
+                    <div class="type-selector-wrapper">
+                        <select id="rankingTypeSelect" class="type-select">
+                            <option value="fard" ${type==='fard'?'selected':''}>📿 Fard Total</option>
+                            <option value="rawatib" ${type==='rawatib'?'selected':''}>🌙 Rawatib Total</option>
+                            <option value="grand" ${type==='grand'?'selected':''}>🏆 Grand Total</option>
+                        </select>
+                        <button class="refresh-btn" onclick="applyTypeChange()"><i class="fas fa-sync-alt"></i></button>
+                    </div>
+                </div>
+            `;
+            
+            if (!range.rankings.length) {
+                return `<div class="ranking-card"><div class="ranking-header"><div class="ranking-title"><i class="fas fa-calendar-alt"></i>Custom Range (${typeLabel})</div>${selector}</div><div class="empty-state">No data for this range.</div></div>`;
             }
             
-            if (startDate > endDate) {
-                alert('Start date cannot be after end date');
-                return;
-            }
+            const stats = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${range.totalStudents}</div><div class="stat-label">Active Students</div></div>
+                    <div class="stat-card"><div class="stat-value">${range.rankings[0]?.totalPoints||0}</div><div class="stat-label">Top Score</div></div>
+                    <div class="stat-card"><div class="stat-value">${range.totalDays}</div><div class="stat-label">Total Days</div></div>
+                </div>
+            `;
             
-            currentStartDate = startDate;
-            currentEndDate = endDate;
-            await loadPage('custom', startDate, endDate);
+            let rows = '';
+            range.rankings.forEach(s => {
+                let rankCls = s.rank===1?'rank-1':(s.rank===2?'rank-2':(s.rank===3?'rank-3':''));
+                rows += `<tr>
+                    <td class="rank-cell"><span class="${rankCls} font-bold">#${s.rank}</span></td>
+                    <td><div class="font-medium">${escapeHtml(s.name)}</div><div class="text-xs text-gray-500">Class ${s.class}</div></td>
+                    <td class="points-cell">${s.totalPoints} pts</td>
+                    <td class="text-sm text-gray-500">${s.daysActive}/${range.totalDays} days</td>
+                    <td><button class="eye-btn" onclick="showDetailsFromCache('${escapeHtml(s.name)}', '${s.class}', 'custom')"><i class="fas fa-eye"></i></button></td>
+                </tr>`;
+            });
+            
+            return `<div class="ranking-card">
+                <div class="ranking-header"><div class="ranking-title"><i class="fas fa-calendar-alt"></i>Custom Range · ${typeLabel} (Top 10)</div>${selector}</div>
+                <div class="date-badge"><i class="fas fa-calendar-alt mr-1"></i>${formatDisplayDate(startDate)} - ${formatDisplayDate(endDate)}</div>
+                ${stats}
+                <div style="overflow-x:auto;"><table class="ranking-table"><thead><tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Active Days</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+            </div>`;
         }
-        
-        function setupNavigation() {
-            const navBtns = document.querySelectorAll('.nav-btn');
-            navBtns.forEach(btn => {
+
+        // ---------- RENDER CLASS ----------
+        function renderClassRankings(classData, classNum, type) {
+            const rankData = getClassRankings(classData, classNum, type);
+            const typeLabel = type==='fard'?'Fard':(type==='rawatib'?'Rawatib':'Grand');
+            
+            const selector = `
+                <div class="type-selector-wrapper">
+                    <select id="rankingTypeSelect" class="type-select">
+                        <option value="fard" ${type==='fard'?'selected':''}>📿 Fard</option>
+                        <option value="rawatib" ${type==='rawatib'?'selected':''}>🌙 Rawatib</option>
+                        <option value="grand" ${type==='grand'?'selected':''}>🏆 Grand</option>
+                    </select>
+                    <button class="refresh-btn" onclick="applyTypeChange()"><i class="fas fa-sync-alt"></i></button>
+                </div>
+            `;
+            
+            if (!rankData.rankings.length) {
+                return `<div class="ranking-card"><div class="ranking-header"><div class="ranking-title"><i class="fas fa-graduation-cap"></i>Class ${classNum} · ${typeLabel}</div>${selector}</div><div class="empty-state">No data.</div></div>`;
+            }
+            
+            const stats = `
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-value">${rankData.totalStudents}</div><div class="stat-label">Students</div></div>
+                    <div class="stat-card"><div class="stat-value">${rankData.rankings[0]?.totalPoints||0}</div><div class="stat-label">Top Score</div></div>
+                    <div class="stat-card"><div class="stat-value">${rankData.totalSubmissions}</div><div class="stat-label">Submissions</div></div>
+                </div>
+            `;
+            
+            let rows = '';
+            rankData.rankings.forEach(s => {
+                let rankCls = s.rank===1?'rank-1':(s.rank===2?'rank-2':(s.rank===3?'rank-3':''));
+                rows += `<tr>
+                    <td class="rank-cell"><span class="${rankCls} font-bold">#${s.rank}</span></td>
+                    <td><div class="font-medium">${escapeHtml(s.name)}</div></td>
+                    <td class="points-cell">${s.totalPoints} pts</td>
+                    <td class="text-sm text-gray-500">${s.daysCount} days</td>
+                    <td><button class="eye-btn" onclick="showDetailsFromCache('${escapeHtml(s.name)}', '${classNum}', 'class')"><i class="fas fa-eye"></i></button></td>
+                </tr>`;
+            });
+            
+            return `<div class="ranking-card">
+                <div class="ranking-header"><div class="ranking-title"><i class="fas fa-graduation-cap"></i>Class ${classNum} · ${typeLabel} (All Time)</div>${selector}</div>
+                ${stats}
+                <div style="overflow-x:auto;"><table class="ranking-table"><thead><tr><th>Rank</th><th>Student</th><th>Total Points</th><th>Active Days</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>
+            </div>`;
+        }
+
+        // ---------- DETAILS DISPATCH ----------
+        window.showDetailsFromCache = function(studentName, classNum, source) {
+            let records = [];
+            if (source === 'custom') {
+                // find in custom range (current dates)
+                if (currentStartDate && currentEndDate) {
+                    for (let cls in cachedData) {
+                        for (let rec of cachedData[cls]) {
+                            if (rec.date >= currentStartDate && rec.date <= currentEndDate && rec.name === studentName) {
+                                records.push({...rec, class: cls});
+                            }
+                        }
+                    }
+                }
+            } else {
+                // class page: all records for that class, filtered by name
+                const classData = cachedData[classNum] || [];
+                records = classData.filter(r => r.name === studentName).map(r => ({...r, class: classNum}));
+            }
+            if (!records.length) { alert("No detailed submissions found."); return; }
+            showStudentDetails({ name: studentName, class: classNum, rawRecords: records });
+        };
+
+        // ---------- PAGE LOAD ----------
+        async function loadPage(page, startDate=null, endDate=null, type=currentRankingType) {
+            if (isLoading) return;
+            const main = document.getElementById('mainContent');
+            main.innerHTML = '<div class="loading-spinner"><div class="spinner"></div></div>';
+            isLoading = true;
+            try {
+                if (Object.keys(cachedData).length === 0) await loadAllClassData();
+                let html = '';
+                if (page === 'custom') {
+                    html = renderCustomRange(cachedData, startDate || currentStartDate, endDate || currentEndDate, type);
+                } else if (page.startsWith('class-')) {
+                    const cls = parseInt(page.split('-')[1]);
+                    html = renderClassRankings(cachedData[cls] || [], cls, type);
+                }
+                main.innerHTML = html;
+            } catch(e) {
+                main.innerHTML = `<div class="ranking-card"><div class="empty-state"><i class="fas fa-exclamation-triangle"></i> Error</div></div>`;
+            } finally { isLoading = false; }
+        }
+
+        window.applyDateRange = function() {
+            const start = document.getElementById('startDate')?.value;
+            const end = document.getElementById('endDate')?.value;
+            if (!start || !end) { alert('Select both dates'); return; }
+            if (start > end) { alert('Start must be before end'); return; }
+            currentStartDate = start; currentEndDate = end;
+            const sel = document.getElementById('rankingTypeSelect');
+            if (sel) currentRankingType = sel.value;
+            loadPage(currentPage, start, end, currentRankingType);
+        };
+
+        window.applyTypeChange = function() {
+            const sel = document.getElementById('rankingTypeSelect');
+            if (sel) currentRankingType = sel.value;
+            if (currentPage === 'custom') {
+                loadPage('custom', currentStartDate, currentEndDate, currentRankingType);
+            } else {
+                loadPage(currentPage, null, null, currentRankingType);
+            }
+        };
+
+        window.refreshData = async function() {
+            cachedData = {};
+            await loadPage(currentPage, currentStartDate, currentEndDate, currentRankingType);
+        };
+
+        function setupNav() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.addEventListener('click', async () => {
-                    navBtns.forEach(b => b.classList.remove('active'));
+                    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
                     btn.classList.add('active');
                     currentPage = btn.dataset.page;
-                    await loadPage(currentPage);
+                    await loadPage(currentPage, currentStartDate, currentEndDate, currentRankingType);
                 });
             });
         }
-        
-        // Make functions available globally
-        window.refreshData = refreshData;
-        window.applyDateRange = applyDateRange;
-        
-        document.addEventListener('DOMContentLoaded', async () => {
-            setupNavigation();
-            await loadPage('custom');
+
+        document.addEventListener('DOMContentLoaded', async ()=>{
+            setupNav();
+            // set default dates
+            const today = new Date();
+            const weekAgo = new Date(today); weekAgo.setDate(today.getDate()-6);
+            currentStartDate = weekAgo.toISOString().split('T')[0];
+            currentEndDate = today.toISOString().split('T')[0];
+            currentRankingType = 'grand';
+            await loadPage('custom', currentStartDate, currentEndDate, 'grand');
         });
-        
-        console.log('%c🌙 Tharbiyya - Student Ranking System 🌙', 'color: #059669; font-size: 16px; font-weight: bold');
-        console.log('%cCustom Date Range Selector Available | Points: Adā\'=3, Qaḍā\'=2, No=-1', 'color: #1f2937; font-size: 12px');
-    </script>
+
+        window.refreshData = refreshData;
+        console.log('🌙 Tharbiyya — Fard / Rawatib / Grand, eye details ready');
+    })();
+</script>
 </body>
 </html>
