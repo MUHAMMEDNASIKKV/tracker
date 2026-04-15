@@ -54,7 +54,7 @@
         
         /* Dashboard Container */
         .dashboard-container {
-            max-width: 900px;
+            max-width: 800px;
             width: 100%;
             margin: 0 auto;
             background: white;
@@ -158,106 +158,31 @@
         /* Prayer Options */
         .prayer-options {
             display: flex;
-            gap: 0.75rem;
+            gap: 1rem;
             justify-content: center;
             flex-wrap: wrap;
         }
         
         .prayer-option {
             flex: 1;
-            min-width: 90px;
+            min-width: 100px;
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 0.5rem;
-            padding: 0.75rem 0.5rem;
+            padding: 0.75rem 1rem;
             border: 2px solid #e5e7eb;
             border-radius: 16px;
             background: white;
             cursor: pointer;
             transition: all 0.2s ease;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
         
         .prayer-option:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        /* Rawatib Options */
-        .rawatib-options {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-        }
-        
-        .rawatib-option {
-            flex: 1;
-            max-width: 80px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 0.25rem;
-            padding: 0.5rem 0.25rem;
-            border: 2px solid #e5e7eb;
-            border-radius: 12px;
-            background: white;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-weight: 600;
-            font-size: 0.75rem;
-        }
-        
-        .rawatib-option:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-        }
-        
-        .rawatib-option[data-value="1"] {
-            border-color: #10b981;
-        }
-        
-        .rawatib-option[data-value="1"]:hover {
-            background: #ecfdf5;
-            border-color: #059669;
-        }
-        
-        .rawatib-option[data-value="0"] {
-            border-color: #ef4444;
-        }
-        
-        .rawatib-option[data-value="0"]:hover {
-            background: #fef2f2;
-            border-color: #dc2626;
-        }
-        
-        .rawatib-option.selected[data-value="1"] {
-            background: #059669;
-            border-color: #059669;
-            color: white;
-        }
-        
-        .rawatib-option.selected[data-value="0"] {
-            background: #dc2626;
-            border-color: #dc2626;
-            color: white;
-        }
-        
-        .rawatib-option i {
-            font-size: 1rem;
-        }
-        
-        .rawatib-option[data-value="1"] i {
-            color: #059669;
-        }
-        
-        .rawatib-option[data-value="0"] i {
-            color: #ef4444;
-        }
-        
-        .rawatib-option.selected i {
-            color: white !important;
         }
         
         /* Default border colors based on option type */
@@ -333,40 +258,119 @@
         
         /* Rawatib Section */
         .rawatib-section {
-            margin-top: 1rem;
-            padding-top: 1rem;
+            margin-top: 1.25rem;
+            padding-top: 1.25rem;
             border-top: 2px dashed #e5e7eb;
         }
         
-        .rawatib-label {
+        .rawatib-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .rawatib-header i {
+            color: #f59e0b;
+            font-size: 0.9rem;
+        }
+        
+        .rawatib-header span {
             font-size: 0.9rem;
             font-weight: 600;
             color: #6b7280;
-            margin-bottom: 0.5rem;
-            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .rawatib-items {
-            display: flex;
-            gap: 0.5rem;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-        
-        .rawatib-item {
-            flex: 1;
-            min-width: 100px;
+        .rawatib-card {
             background: #f9fafb;
-            border-radius: 12px;
-            padding: 0.5rem;
+            border-radius: 16px;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
         }
         
         .rawatib-name {
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             font-weight: 600;
-            color: #4b5563;
-            margin-bottom: 0.25rem;
+            color: #374151;
+            margin-bottom: 0.75rem;
             text-align: center;
+        }
+        
+        .rawatib-options {
+            display: flex;
+            gap: 0.75rem;
+            justify-content: center;
+        }
+        
+        .rawatib-option {
+            flex: 1;
+            max-width: 100px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.6rem 0.5rem;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-weight: 600;
+            font-size: 0.8rem;
+        }
+        
+        .rawatib-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .rawatib-option[data-value="1"] {
+            border-color: #10b981;
+        }
+        
+        .rawatib-option[data-value="1"]:hover {
+            background: #ecfdf5;
+            border-color: #059669;
+        }
+        
+        .rawatib-option[data-value="0"] {
+            border-color: #ef4444;
+        }
+        
+        .rawatib-option[data-value="0"]:hover {
+            background: #fef2f2;
+            border-color: #dc2626;
+        }
+        
+        .rawatib-option.selected[data-value="1"] {
+            background: #059669;
+            border-color: #059669;
+            color: white;
+        }
+        
+        .rawatib-option.selected[data-value="0"] {
+            background: #dc2626;
+            border-color: #dc2626;
+            color: white;
+        }
+        
+        .rawatib-option i {
+            font-size: 1rem;
+        }
+        
+        .rawatib-option[data-value="1"] i {
+            color: #059669;
+        }
+        
+        .rawatib-option[data-value="0"] i {
+            color: #ef4444;
+        }
+        
+        .rawatib-option.selected i {
+            color: white !important;
         }
         
         /* Error Message */
@@ -429,27 +433,6 @@
             border: 1px solid #05966920;
         }
         
-        /* Section Header */
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            margin-bottom: 1rem;
-            padding-bottom: 0.5rem;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .section-header i {
-            color: #059669;
-            font-size: 1.25rem;
-        }
-        
-        .section-header h3 {
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #1f2937;
-        }
-        
         /* Responsive */
         @media (max-width: 640px) {
             .prayer-title {
@@ -457,21 +440,19 @@
             }
             
             .prayer-option {
-                min-width: 70px;
-                padding: 0.5rem 0.25rem;
-                font-size: 0.7rem;
-            }
-            
-            .rawatib-item {
                 min-width: 80px;
-            }
-            
-            .rawatib-name {
-                font-size: 0.7rem;
+                padding: 0.5rem 0.75rem;
+                font-size: 0.8rem;
             }
             
             .dashboard-container {
                 padding: 1rem;
+            }
+            
+            .rawatib-option {
+                max-width: 80px;
+                padding: 0.5rem 0.25rem;
+                font-size: 0.7rem;
             }
         }
         
@@ -677,110 +658,9 @@
         
         <!-- Prayer Form -->
         <form id="prayerForm">
-            <!-- Rawatib Section Header -->
-            <div class="section-header">
-                <i class="fas fa-star"></i>
-                <h3>Rawatib (Sunnah Prayers)</h3>
-            </div>
-            
-            <!-- Rawatib Prayers -->
-            <div class="prayer-card">
-                <div class="rawatib-items">
-                    <div class="rawatib-item">
-                        <div class="rawatib-name">B-Subh</div>
-                        <div class="rawatib-options" data-rawatib="bSubh">
-                            <button type="button" class="rawatib-option" data-value="1">
-                                <i class="fas fa-check"></i>
-                                <span>Yes</span>
-                            </button>
-                            <button type="button" class="rawatib-option" data-value="0">
-                                <i class="fas fa-times"></i>
-                                <span>No</span>
-                            </button>
-                        </div>
-                        <input type="hidden" name="bSubh" id="bSubh">
-                    </div>
-                    <div class="rawatib-item">
-                        <div class="rawatib-name">B-Zuhr</div>
-                        <div class="rawatib-options" data-rawatib="bZuhr">
-                            <button type="button" class="rawatib-option" data-value="1">
-                                <i class="fas fa-check"></i>
-                                <span>Yes</span>
-                            </button>
-                            <button type="button" class="rawatib-option" data-value="0">
-                                <i class="fas fa-times"></i>
-                                <span>No</span>
-                            </button>
-                        </div>
-                        <input type="hidden" name="bZuhr" id="bZuhr">
-                    </div>
-                    <div class="rawatib-item">
-                        <div class="rawatib-name">A-Zuhr</div>
-                        <div class="rawatib-options" data-rawatib="aZuhr">
-                            <button type="button" class="rawatib-option" data-value="1">
-                                <i class="fas fa-check"></i>
-                                <span>Yes</span>
-                            </button>
-                            <button type="button" class="rawatib-option" data-value="0">
-                                <i class="fas fa-times"></i>
-                                <span>No</span>
-                            </button>
-                        </div>
-                        <input type="hidden" name="aZuhr" id="aZuhr">
-                    </div>
-                    <div class="rawatib-item">
-                        <div class="rawatib-name">B-Asr</div>
-                        <div class="rawatib-options" data-rawatib="bAsr">
-                            <button type="button" class="rawatib-option" data-value="1">
-                                <i class="fas fa-check"></i>
-                                <span>Yes</span>
-                            </button>
-                            <button type="button" class="rawatib-option" data-value="0">
-                                <i class="fas fa-times"></i>
-                                <span>No</span>
-                            </button>
-                        </div>
-                        <input type="hidden" name="bAsr" id="bAsr">
-                    </div>
-                    <div class="rawatib-item">
-                        <div class="rawatib-name">A-Magrib</div>
-                        <div class="rawatib-options" data-rawatib="aMagrib">
-                            <button type="button" class="rawatib-option" data-value="1">
-                                <i class="fas fa-check"></i>
-                                <span>Yes</span>
-                            </button>
-                            <button type="button" class="rawatib-option" data-value="0">
-                                <i class="fas fa-times"></i>
-                                <span>No</span>
-                            </button>
-                        </div>
-                        <input type="hidden" name="aMagrib" id="aMagrib">
-                    </div>
-                    <div class="rawatib-item">
-                        <div class="rawatib-name">A-Isha</div>
-                        <div class="rawatib-options" data-rawatib="aIsha">
-                            <button type="button" class="rawatib-option" data-value="1">
-                                <i class="fas fa-check"></i>
-                                <span>Yes</span>
-                            </button>
-                            <button type="button" class="rawatib-option" data-value="0">
-                                <i class="fas fa-times"></i>
-                                <span>No</span>
-                            </button>
-                        </div>
-                        <input type="hidden" name="aIsha" id="aIsha">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Fard Prayers Section Header -->
-            <div class="section-header">
-                <i class="fas fa-mosque"></i>
-                <h3>Fard Prayers</h3>
-            </div>
-            
             <div class="prayers-container">
-                <!-- Subh (Fajr) Prayer - First -->
+                
+                <!-- ==================== SUBH (FAJR) PRAYER ==================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Subh (Fajr)</div>
                     <div class="prayer-arabic">صلاة الفجر</div>
@@ -799,9 +679,32 @@
                         </button>
                     </div>
                     <input type="hidden" name="subh" id="subh" required>
+                    
+                    <!-- Rawatib: B-Subh (Before Subh) -->
+                    <div class="rawatib-section">
+                        <div class="rawatib-header">
+                            <i class="fas fa-star"></i>
+                            <span>Rawatib</span>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="rawatib-card">
+                            <div class="rawatib-name">B-Subh (Before Subh)</div>
+                            <div class="rawatib-options" data-rawatib="bSubh">
+                                <button type="button" class="rawatib-option" data-value="1">
+                                    <i class="fas fa-check"></i>
+                                    <span>Yes</span>
+                                </button>
+                                <button type="button" class="rawatib-option" data-value="0">
+                                    <i class="fas fa-times"></i>
+                                    <span>No</span>
+                                </button>
+                            </div>
+                            <input type="hidden" name="bSubh" id="bSubh">
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Zuhr Prayer - Second -->
+                <!-- ==================== ZUHR PRAYER ==================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Zuhr</div>
                     <div class="prayer-arabic">صلاة الظهر</div>
@@ -820,9 +723,48 @@
                         </button>
                     </div>
                     <input type="hidden" name="zuhr" id="zuhr" required>
+                    
+                    <!-- Rawatib: B-Zuhr (Before Zuhr) -->
+                    <div class="rawatib-section">
+                        <div class="rawatib-header">
+                            <i class="fas fa-star"></i>
+                            <span>Rawatib</span>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="rawatib-card" style="margin-bottom: 0.75rem;">
+                            <div class="rawatib-name">B-Zuhr (Before Zuhr)</div>
+                            <div class="rawatib-options" data-rawatib="bZuhr">
+                                <button type="button" class="rawatib-option" data-value="1">
+                                    <i class="fas fa-check"></i>
+                                    <span>Yes</span>
+                                </button>
+                                <button type="button" class="rawatib-option" data-value="0">
+                                    <i class="fas fa-times"></i>
+                                    <span>No</span>
+                                </button>
+                            </div>
+                            <input type="hidden" name="bZuhr" id="bZuhr">
+                        </div>
+                        
+                        <!-- Rawatib: A-Zuhr (After Zuhr) -->
+                        <div class="rawatib-card">
+                            <div class="rawatib-name">A-Zuhr (After Zuhr)</div>
+                            <div class="rawatib-options" data-rawatib="aZuhr">
+                                <button type="button" class="rawatib-option" data-value="1">
+                                    <i class="fas fa-check"></i>
+                                    <span>Yes</span>
+                                </button>
+                                <button type="button" class="rawatib-option" data-value="0">
+                                    <i class="fas fa-times"></i>
+                                    <span>No</span>
+                                </button>
+                            </div>
+                            <input type="hidden" name="aZuhr" id="aZuhr">
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Asr Prayer - Third -->
+                <!-- ==================== ASR PRAYER ==================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Asr</div>
                     <div class="prayer-arabic">صلاة العصر</div>
@@ -841,9 +783,32 @@
                         </button>
                     </div>
                     <input type="hidden" name="asr" id="asr" required>
+                    
+                    <!-- Rawatib: B-Asr (Before Asr) -->
+                    <div class="rawatib-section">
+                        <div class="rawatib-header">
+                            <i class="fas fa-star"></i>
+                            <span>Rawatib</span>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="rawatib-card">
+                            <div class="rawatib-name">B-Asr (Before Asr)</div>
+                            <div class="rawatib-options" data-rawatib="bAsr">
+                                <button type="button" class="rawatib-option" data-value="1">
+                                    <i class="fas fa-check"></i>
+                                    <span>Yes</span>
+                                </button>
+                                <button type="button" class="rawatib-option" data-value="0">
+                                    <i class="fas fa-times"></i>
+                                    <span>No</span>
+                                </button>
+                            </div>
+                            <input type="hidden" name="bAsr" id="bAsr">
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Magrib Prayer - Fourth -->
+                <!-- ==================== MAGRIB PRAYER ==================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Magrib</div>
                     <div class="prayer-arabic">صلاة المغرب</div>
@@ -862,9 +827,32 @@
                         </button>
                     </div>
                     <input type="hidden" name="magrib" id="magrib" required>
+                    
+                    <!-- Rawatib: A-Magrib (After Magrib) -->
+                    <div class="rawatib-section">
+                        <div class="rawatib-header">
+                            <i class="fas fa-star"></i>
+                            <span>Rawatib</span>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="rawatib-card">
+                            <div class="rawatib-name">A-Magrib (After Magrib)</div>
+                            <div class="rawatib-options" data-rawatib="aMagrib">
+                                <button type="button" class="rawatib-option" data-value="1">
+                                    <i class="fas fa-check"></i>
+                                    <span>Yes</span>
+                                </button>
+                                <button type="button" class="rawatib-option" data-value="0">
+                                    <i class="fas fa-times"></i>
+                                    <span>No</span>
+                                </button>
+                            </div>
+                            <input type="hidden" name="aMagrib" id="aMagrib">
+                        </div>
+                    </div>
                 </div>
                 
-                <!-- Isha Prayer - Fifth -->
+                <!-- ==================== ISHA PRAYER ==================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Isha</div>
                     <div class="prayer-arabic">صلاة العشاء</div>
@@ -883,7 +871,31 @@
                         </button>
                     </div>
                     <input type="hidden" name="isha" id="isha" required>
+                    
+                    <!-- Rawatib: A-Isha (After Isha) -->
+                    <div class="rawatib-section">
+                        <div class="rawatib-header">
+                            <i class="fas fa-star"></i>
+                            <span>Rawatib</span>
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <div class="rawatib-card">
+                            <div class="rawatib-name">A-Isha (After Isha)</div>
+                            <div class="rawatib-options" data-rawatib="aIsha">
+                                <button type="button" class="rawatib-option" data-value="1">
+                                    <i class="fas fa-check"></i>
+                                    <span>Yes</span>
+                                </button>
+                                <button type="button" class="rawatib-option" data-value="0">
+                                    <i class="fas fa-times"></i>
+                                    <span>No</span>
+                                </button>
+                            </div>
+                            <input type="hidden" name="aIsha" id="aIsha">
+                        </div>
+                    </div>
                 </div>
+                
             </div>
             
             <!-- Submit Button -->
