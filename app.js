@@ -1,7 +1,8 @@
 // ============================================
 // THARBIYYA - Prayer Tracker
-// 5 Daily Prayers Tracker
+// 5 Daily Prayers Tracker + Rawatib
 // Values: Adā' = 2, Qaḍā' = 1, No = 0
+// Rawatib: Yes = 1, No = 0
 // Order: Subh, Zuhr, Asr, Magrib, Isha
 // ============================================
 
@@ -38,7 +39,7 @@ const submissionCache = new Map();
 class GoogleSheetsAPI {
     constructor() {
         // IMPORTANT: Replace this URL with your Google Apps Script Web App URL
-        this.apiUrl = "https://script.google.com/macros/s/AKfycbxyskFl5im3KbMks256GgowmoqfsNtyA10OF5vbEZ1V2K0dZ55V4204qAxNFtunmvQx/exec";
+        this.apiUrl = "https://script.google.com/macros/s/AKfycbw3VUkqEbM-YON7Xshbpb3pBMCZ6uoxuA1N6LjfBAAVXQLy2bFnbq0amPzDRfkEqyDM/exec";
     }
 
     async addPrayerRecord(sheetName, rowData) {
@@ -303,6 +304,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Initialize prayer option buttons
     initializePrayerOptions();
+    initializeRawatibOptions();
     
     // Add login form submit listener
     document.getElementById('loginForm').addEventListener('submit', login);
@@ -525,6 +527,38 @@ function initializePrayerOptions() {
     });
 }
 
+function initializeRawatibOptions() {
+    // Delegate event listener for rawatib options
+    document.addEventListener('click', function(e) {
+        const option = e.target.closest('.rawatib-option');
+        if (!option) return;
+        
+        const optionsContainer = option.closest('.rawatib-options');
+        if (!optionsContainer) return;
+        
+        // Get all options in this container
+        const options = optionsContainer.querySelectorAll('.rawatib-option');
+        const rawatibName = optionsContainer.dataset.rawatib;
+        
+        // Remove selected class from all options
+        options.forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        
+        // Add selected class to clicked option
+        option.classList.add('selected');
+        
+        // Update hidden input value with the numeric value (1 or 0)
+        if (rawatibName) {
+            const hiddenInput = document.getElementById(rawatibName);
+            if (hiddenInput) {
+                hiddenInput.value = option.dataset.value;
+                console.log(`${rawatibName} set to: ${option.dataset.value} (${option.querySelector('span')?.innerText || 'Unknown'})`);
+            }
+        }
+    });
+}
+
 function resetPrayerForm() {
     // Reset all prayer options
     document.querySelectorAll('.prayer-options').forEach(container => {
@@ -542,6 +576,22 @@ function resetPrayerForm() {
         }
     });
     
+    // Reset all rawatib options
+    document.querySelectorAll('.rawatib-options').forEach(container => {
+        const options = container.querySelectorAll('.rawatib-option');
+        const rawatibName = container.dataset.rawatib;
+        
+        options.forEach(opt => {
+            opt.classList.remove('selected');
+        });
+        
+        // Clear hidden input
+        if (rawatibName) {
+            const hiddenInput = document.getElementById(rawatibName);
+            if (hiddenInput) hiddenInput.value = '';
+        }
+    });
+    
     // Enable submit button
     const submitBtn = document.getElementById('submitPrayerBtn');
     submitBtn.disabled = false;
@@ -549,7 +599,7 @@ function resetPrayerForm() {
 }
 
 // Custom Alert Popup with auto-logout after OK button click
-function showSuccessAlertWithLogout(message, onComplete) {
+function showSuccessAlertWithLogout(message, summary, onComplete) {
     // Remove any existing alert
     const existingAlert = document.querySelector('.custom-alert');
     if (existingAlert) {
@@ -565,7 +615,8 @@ function showSuccessAlertWithLogout(message, onComplete) {
                 <i class="fas fa-check-circle"></i>
             </div>
             <div class="custom-alert-title">Successfully Submitted!</div>
-            <div class="custom-alert-message">${message.replace(/\n/g, '<br>')}</div>
+            <div class="custom-alert-message">Your prayer status has been recorded.</div>
+            <div class="custom-alert-summary">${summary}</div>
             <button class="custom-alert-btn" id="customAlertOkBtn">OK</button>
         </div>
     `;
@@ -585,16 +636,30 @@ function showSuccessAlertWithLogout(message, onComplete) {
 async function submitPrayerForm(event) {
     event.preventDefault();
     
-    // Get all prayer values (these are numeric: 2, 1, or 0)
+    // Get all fard prayer values (these are numeric: 2, 1, or 0)
     const subh = document.getElementById('subh').value;
     const zuhr = document.getElementById('zuhr').value;
     const asr = document.getElementById('asr').value;
     const magrib = document.getElementById('magrib').value;
     const isha = document.getElementById('isha').value;
     
-    // Validate all prayers are selected
+    // Validate all fard prayers are selected
     if (!subh || !zuhr || !asr || !magrib || !isha) {
-        alert('Please select status for all 5 prayers');
+        alert('Please select status for all 5 Fard prayers');
+        return;
+    }
+    
+    // Get all rawatib values (these are numeric: 1 or 0, empty means not selected)
+    const bSubh = document.getElementById('bSubh').value;
+    const bZuhr = document.getElementById('bZuhr').value;
+    const aZuhr = document.getElementById('aZuhr').value;
+    const bAsr = document.getElementById('bAsr').value;
+    const aMagrib = document.getElementById('aMagrib').value;
+    const aIsha = document.getElementById('aIsha').value;
+    
+    // Validate all rawatib are selected
+    if (bSubh === '' || bZuhr === '' || aZuhr === '' || bAsr === '' || aMagrib === '' || aIsha === '') {
+        alert('Please select Yes/No for all Rawatib (Sunnah) prayers');
         return;
     }
     
@@ -610,7 +675,7 @@ async function submitPrayerForm(event) {
         const dateStr = now.toISOString().split('T')[0];
         const timeStr = now.toLocaleTimeString('en-GB');
         
-        // Prepare row data: date, time, name, class, subh, zuhr, asr, magrib, isha
+        // Prepare row data: date, time, name, class, subh, zuhr, asr, magrib, isha, bSubh, bZuhr, aZuhr, bAsr, aMagrib, aIsha
         const rowData = [
             dateStr, 
             timeStr, 
@@ -620,7 +685,13 @@ async function submitPrayerForm(event) {
             zuhr,
             asr,
             magrib,
-            isha
+            isha,
+            bSubh,
+            bZuhr,
+            aZuhr,
+            bAsr,
+            aMagrib,
+            aIsha
         ];
         
         console.log('Submitting prayer data:', {
@@ -632,7 +703,13 @@ async function submitPrayerForm(event) {
             zuhr: zuhr,
             asr: asr,
             magrib: magrib,
-            isha: isha
+            isha: isha,
+            bSubh: bSubh,
+            bZuhr: bZuhr,
+            aZuhr: aZuhr,
+            bAsr: bAsr,
+            aMagrib: aMagrib,
+            aIsha: aIsha
         });
         
         // Add record to sheet
@@ -643,17 +720,30 @@ async function submitPrayerForm(event) {
             const cacheKey = `${currentUser.class}_${currentUser.name}_${dateStr}`;
             submissionCache.set(cacheKey, true);
             
-            // Get prayer status texts
-            const subhText = getPrayerStatusText(subh);
-            const zuhrText = getPrayerStatusText(zuhr);
-            const asrText = getPrayerStatusText(asr);
-            const magribText = getPrayerStatusText(magrib);
-            const ishaText = getPrayerStatusText(isha);
+            // Build summary for alert
+            const fardSummary = `
+                <strong>Fard Prayers:</strong><br>
+                Subh: ${getPrayerStatusText(subh)}<br>
+                Zuhr: ${getPrayerStatusText(zuhr)}<br>
+                Asr: ${getPrayerStatusText(asr)}<br>
+                Magrib: ${getPrayerStatusText(magrib)}<br>
+                Isha: ${getPrayerStatusText(isha)}
+            `;
             
-            const message = `Your prayer status has been recorded.\n\n📅 Date: ${new Date().toLocaleDateString()}\n\nSubh: ${subhText}\nZuhr: ${zuhrText}\nAsr: ${asrText}\nMagrib: ${magribText}\nIsha: ${ishaText}\n\nYou will now be logged out.`;
+            const rawatibSummary = `
+                <strong>Rawatib (Sunnah):</strong><br>
+                B-Subh: ${getRawatibStatusText(bSubh)}<br>
+                B-Zuhr: ${getRawatibStatusText(bZuhr)}<br>
+                A-Zuhr: ${getRawatibStatusText(aZuhr)}<br>
+                B-Asr: ${getRawatibStatusText(bAsr)}<br>
+                A-Magrib: ${getRawatibStatusText(aMagrib)}<br>
+                A-Isha: ${getRawatibStatusText(aIsha)}
+            `;
+            
+            const fullSummary = `${fardSummary}<br>${rawatibSummary}<br><br><strong>📅 Date:</strong> ${new Date().toLocaleDateString()}<br><br>You will now be logged out.`;
             
             // Show success popup and logout after OK
-            showSuccessAlertWithLogout(message, function() {
+            showSuccessAlertWithLogout('', fullSummary, function() {
                 // Clear any stored user data
                 currentUser = null;
                 currentClassSheet = null;
@@ -725,6 +815,18 @@ function getPrayerStatusText(value) {
     }
 }
 
+// Helper function to convert rawatib numeric value to text status
+function getRawatibStatusText(value) {
+    switch(value) {
+        case '1':
+            return '✅ Yes';
+        case '0':
+            return '❌ No';
+        default:
+            return 'Unknown';
+    }
+}
+
 // =============================
 // 🔒 Security & Optimization
 // =============================
@@ -744,8 +846,9 @@ document.addEventListener("keydown", function(e) {
 });
 
 // Console welcome message
-console.log('%c🌙 Tharbiyya - 5 Daily Prayers Tracker 🌙', 'color: #059669; font-size: 16px; font-weight: bold;');
-console.log('%cPrayer Values: Adā\' = 2, Qaḍā\' = 1, No = 0', 'color: #1f2937; font-size: 12px;');
+console.log('%c🌙 Tharbiyya - 5 Daily Prayers + Rawatib Tracker 🌙', 'color: #059669; font-size: 16px; font-weight: bold;');
+console.log('%cFard Values: Adā\' = 2, Qaḍā\' = 1, No = 0', 'color: #1f2937; font-size: 12px;');
+console.log('%cRawatib Values: Yes = 1, No = 0', 'color: #1f2937; font-size: 12px;');
 console.log('%cPrayer Order: Subh (Fajr) → Zuhr → Asr → Magrib → Isha', 'color: #1f2937; font-size: 12px;');
 console.log('%c⚠️ Students can only submit ONCE per day!', 'color: #dc2626; font-size: 12px; font-weight: bold;');
 console.log('%c⚡ Optimized for fast loading with caching', 'color: #059669; font-size: 12px; font-weight: bold;');
