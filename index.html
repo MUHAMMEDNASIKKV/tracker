@@ -1,26 +1,27 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes" />
     <title>Prayer Tracker 2026</title>
-    
+
     <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    
+    <script src="https://cdn.tailwindcss.com">
+    </script>
+
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
     <!-- Google Fonts - Arabic Support -->
-    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Poppins', sans-serif;
             background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ec 100%);
@@ -30,11 +31,11 @@
             justify-content: center;
             padding: 1rem;
         }
-        
+
         .arabic-text {
             font-family: 'Amiri', serif;
         }
-        
+
         /* Login Container */
         .login-container {
             max-width: 500px;
@@ -45,13 +46,13 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
         }
-        
+
         @media (min-width: 768px) {
             .login-container {
                 padding: 2.5rem;
             }
         }
-        
+
         /* Dashboard Container */
         .dashboard-container {
             max-width: 800px;
@@ -62,15 +63,16 @@
             padding: 1.5rem;
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
         }
-        
+
         @media (min-width: 768px) {
             .dashboard-container {
                 padding: 2rem;
             }
         }
-        
+
         /* Form Elements */
-        .form-select, .form-input {
+        .form-select,
+        .form-input {
             width: 100%;
             padding: 0.875rem 1rem;
             border: 2px solid #e5e7eb;
@@ -80,13 +82,14 @@
             background-color: white;
             appearance: none;
         }
-        
-        .form-select:focus, .form-input:focus {
+
+        .form-select:focus,
+        .form-input:focus {
             outline: none;
             border-color: #059669;
             box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1);
         }
-        
+
         .form-select {
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3E%3Cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3E%3C/svg%3E");
             background-position: right 0.75rem center;
@@ -94,7 +97,7 @@
             background-size: 1.25rem;
             padding-right: 2.5rem;
         }
-        
+
         .submit-btn {
             width: 100%;
             background: linear-gradient(135deg, #059669, #047857);
@@ -111,19 +114,19 @@
             justify-content: center;
             gap: 0.75rem;
         }
-        
+
         .submit-btn:hover {
             background: linear-gradient(135deg, #047857, #065f46);
             transform: translateY(-2px);
             box-shadow: 0 10px 25px rgba(5, 150, 105, 0.2);
         }
-        
+
         .submit-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
-        
+
         /* Prayer Card */
         .prayer-card {
             background: #ffffff;
@@ -133,12 +136,12 @@
             transition: all 0.2s ease;
             margin-bottom: 1rem;
         }
-        
+
         .prayer-card:hover {
             border-color: #059669;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
         }
-        
+
         .prayer-title {
             font-weight: 700;
             font-size: 1.5rem;
@@ -146,7 +149,7 @@
             text-align: center;
             margin-bottom: 0.5rem;
         }
-        
+
         .prayer-arabic {
             font-family: 'Amiri', serif;
             color: #059669;
@@ -154,115 +157,123 @@
             text-align: center;
             margin-bottom: 1.25rem;
         }
-        
+
         /* Prayer Options */
         .prayer-options {
             display: flex;
-            gap: 1rem;
+            gap: 0.75rem;
             justify-content: center;
             flex-wrap: wrap;
         }
-        
+
         .prayer-option {
             flex: 1;
-            min-width: 100px;
+            min-width: 80px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 0.5rem;
-            padding: 0.75rem 1rem;
+            gap: 0.4rem;
+            padding: 0.65rem 0.5rem;
             border: 2px solid #e5e7eb;
-            border-radius: 16px;
+            border-radius: 14px;
             background: white;
             cursor: pointer;
             transition: all 0.2s ease;
             font-weight: 600;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
         }
-        
+
         .prayer-option:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        
+
         /* Default border colors based on option type */
         .prayer-option[data-value="2"] {
             border-color: #10b981;
         }
-        
         .prayer-option[data-value="2"]:hover {
             background: #ecfdf5;
             border-color: #059669;
         }
-        
+
         .prayer-option[data-value="1"] {
             border-color: #3b82f6;
         }
-        
         .prayer-option[data-value="1"]:hover {
             background: #eff6ff;
             border-color: #2563eb;
         }
-        
+
+        .prayer-option[data-value="3"] {
+            border-color: #8b5cf6;
+        }
+        .prayer-option[data-value="3"]:hover {
+            background: #f5f3ff;
+            border-color: #7c3aed;
+        }
+
         .prayer-option[data-value="0"] {
             border-color: #ef4444;
         }
-        
         .prayer-option[data-value="0"]:hover {
             background: #fef2f2;
             border-color: #dc2626;
         }
-        
+
         /* Selected states */
         .prayer-option.selected[data-value="2"] {
             background: #059669;
             border-color: #059669;
             color: white;
         }
-        
         .prayer-option.selected[data-value="1"] {
             background: #2563eb;
             border-color: #2563eb;
             color: white;
         }
-        
+        .prayer-option.selected[data-value="3"] {
+            background: #7c3aed;
+            border-color: #7c3aed;
+            color: white;
+        }
         .prayer-option.selected[data-value="0"] {
             background: #dc2626;
             border-color: #dc2626;
             color: white;
         }
-        
+
         .prayer-option.selected i {
             color: white !important;
         }
-        
+
         .prayer-option i {
-            font-size: 1.25rem;
+            font-size: 1.15rem;
         }
-        
+
         .prayer-option[data-value="2"] i {
             color: #059669;
         }
-        
         .prayer-option[data-value="1"] i {
             color: #3b82f6;
         }
-        
+        .prayer-option[data-value="3"] i {
+            color: #8b5cf6;
+        }
         .prayer-option[data-value="0"] i {
             color: #ef4444;
         }
-        
         .prayer-option.selected i {
             color: white !important;
         }
-        
+
         /* Rawatib Section */
         .rawatib-section {
             margin-top: 1.25rem;
             padding-top: 1.25rem;
             border-top: 2px dashed #e5e7eb;
         }
-        
+
         .rawatib-header {
             display: flex;
             align-items: center;
@@ -270,12 +281,11 @@
             gap: 0.5rem;
             margin-bottom: 1rem;
         }
-        
+
         .rawatib-header i {
             color: #f59e0b;
             font-size: 0.9rem;
         }
-        
         .rawatib-header span {
             font-size: 0.9rem;
             font-weight: 600;
@@ -283,14 +293,14 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        
+
         .rawatib-card {
             background: #f9fafb;
             border-radius: 16px;
             padding: 1rem;
             border: 1px solid #e5e7eb;
         }
-        
+
         .rawatib-name {
             font-size: 0.9rem;
             font-weight: 600;
@@ -298,13 +308,13 @@
             margin-bottom: 0.75rem;
             text-align: center;
         }
-        
+
         .rawatib-options {
             display: flex;
             gap: 0.75rem;
             justify-content: center;
         }
-        
+
         .rawatib-option {
             flex: 1;
             max-width: 100px;
@@ -321,58 +331,52 @@
             font-weight: 600;
             font-size: 0.8rem;
         }
-        
+
         .rawatib-option:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
-        
+
         .rawatib-option[data-value="1"] {
             border-color: #10b981;
         }
-        
         .rawatib-option[data-value="1"]:hover {
             background: #ecfdf5;
             border-color: #059669;
         }
-        
+
         .rawatib-option[data-value="0"] {
             border-color: #ef4444;
         }
-        
         .rawatib-option[data-value="0"]:hover {
             background: #fef2f2;
             border-color: #dc2626;
         }
-        
+
         .rawatib-option.selected[data-value="1"] {
             background: #059669;
             border-color: #059669;
             color: white;
         }
-        
         .rawatib-option.selected[data-value="0"] {
             background: #dc2626;
             border-color: #dc2626;
             color: white;
         }
-        
+
         .rawatib-option i {
             font-size: 1rem;
         }
-        
         .rawatib-option[data-value="1"] i {
             color: #059669;
         }
-        
         .rawatib-option[data-value="0"] i {
             color: #ef4444;
         }
-        
         .rawatib-option.selected i {
             color: white !important;
         }
-        
+
         /* Error Message */
         .error-message {
             background: #fef2f2;
@@ -386,7 +390,7 @@
             gap: 0.75rem;
             font-weight: 500;
         }
-        
+
         /* Logout Button */
         .logout-btn {
             color: #6b7280;
@@ -401,17 +405,16 @@
             border: none;
             cursor: pointer;
         }
-        
         .logout-btn:hover {
             background: #f3f4f6;
             color: #dc2626;
         }
-        
+
         /* Hidden Class */
         .hidden {
             display: none !important;
         }
-        
+
         /* Date Display */
         .date-badge {
             background: linear-gradient(135deg, #fafaf9, #f5f5f4);
@@ -424,7 +427,7 @@
             color: #1f2937;
             border: 1px solid #e7e5e4;
         }
-        
+
         /* User Info */
         .user-info-card {
             background: linear-gradient(135deg, #05966910, #04785710);
@@ -432,48 +435,70 @@
             border-radius: 40px;
             border: 1px solid #05966920;
         }
-        
+
         /* Responsive */
         @media (max-width: 640px) {
             .prayer-title {
                 font-size: 1.25rem;
             }
-            
             .prayer-option {
-                min-width: 80px;
-                padding: 0.5rem 0.75rem;
-                font-size: 0.8rem;
+                min-width: 65px;
+                padding: 0.45rem 0.35rem;
+                font-size: 0.7rem;
+                gap: 0.2rem;
             }
-            
+            .prayer-option i {
+                font-size: 0.95rem;
+            }
             .dashboard-container {
                 padding: 1rem;
             }
-            
             .rawatib-option {
-                max-width: 80px;
-                padding: 0.5rem 0.25rem;
-                font-size: 0.7rem;
+                max-width: 70px;
+                padding: 0.4rem 0.2rem;
+                font-size: 0.65rem;
+            }
+            .prayer-options {
+                gap: 0.4rem;
             }
         }
-        
+
+        @media (max-width: 480px) {
+            .prayer-option {
+                min-width: 55px;
+                padding: 0.35rem 0.2rem;
+                font-size: 0.6rem;
+                border-radius: 10px;
+            }
+            .prayer-option i {
+                font-size: 0.8rem;
+            }
+            .prayer-options {
+                gap: 0.3rem;
+            }
+        }
+
         /* Loading Spinner */
         .spinner {
             animation: spin 1s linear infinite;
         }
-        
         @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
         }
-        
-        /* Prayer Grid */
+
+        /* Prayers Container */
         .prayers-container {
             display: flex;
             flex-direction: column;
             gap: 1rem;
             margin-bottom: 1.5rem;
         }
-        
+
         /* Custom Alert Popup */
         .custom-alert {
             position: fixed;
@@ -487,19 +512,17 @@
             justify-content: center;
             z-index: 1000;
         }
-        
         .custom-alert-content {
             background: white;
             border-radius: 24px;
             padding: 1.5rem;
-            max-width: 350px;
+            max-width: 380px;
             width: 90%;
             text-align: center;
             animation: fadeIn 0.3s ease;
             max-height: 80vh;
             overflow-y: auto;
         }
-        
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -510,7 +533,6 @@
                 transform: scale(1);
             }
         }
-        
         .custom-alert-icon {
             width: 60px;
             height: 60px;
@@ -521,25 +543,21 @@
             justify-content: center;
             margin: 0 auto 1rem;
         }
-        
         .custom-alert-icon i {
             font-size: 2rem;
             color: white;
         }
-        
         .custom-alert-title {
             font-size: 1.25rem;
             font-weight: 600;
             color: #1f2937;
             margin-bottom: 0.5rem;
         }
-        
         .custom-alert-message {
             color: #6b7280;
             margin-bottom: 1rem;
             font-size: 0.9rem;
         }
-        
         .custom-alert-summary {
             background: #f9fafb;
             border-radius: 12px;
@@ -548,7 +566,9 @@
             text-align: left;
             font-size: 0.85rem;
         }
-        
+        .custom-alert-summary strong {
+            color: #1f2937;
+        }
         .custom-alert-btn {
             background: #059669;
             color: white;
@@ -559,21 +579,23 @@
             cursor: pointer;
             transition: all 0.2s ease;
         }
-        
         .custom-alert-btn:hover {
             background: #047857;
         }
     </style>
 </head>
 <body>
-    <!-- Login Page -->
+
+    <!-- ======================================== -->
+    <!-- LOGIN PAGE                              -->
+    <!-- ======================================== -->
     <div id="loginPage" class="login-container">
         <div class="text-center mb-8">
             <p class="text-sm text-gray-500 mt-2">Daily Prayer Tracker</p>
         </div>
-        
+
         <form id="loginForm">
-            <!-- Class Dropdown - FIRST -->
+            <!-- Class Dropdown -->
             <div class="mb-5">
                 <label for="studentClass" class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-graduation-cap mr-2 text-emerald-600"></i>Select Class
@@ -592,8 +614,8 @@
                     <option value="10">Class 10</option>
                 </select>
             </div>
-            
-            <!-- Name Dropdown - SECOND -->
+
+            <!-- Name Dropdown -->
             <div class="mb-5">
                 <label for="studentName" class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-user mr-2 text-emerald-600"></i>Select Student Name
@@ -602,35 +624,37 @@
                     <option value="" disabled selected>-- First Select Class --</option>
                 </select>
             </div>
-            
-            <!-- Password - THIRD -->
+
+            <!-- Password -->
             <div class="mb-6">
                 <label for="password" class="block text-sm font-medium text-gray-700 mb-2">
                     <i class="fas fa-lock mr-2 text-emerald-600"></i>Password
                 </label>
-                <input type="password" id="password" name="password" required placeholder="Enter your password" class="form-input">
+                <input type="password" id="password" name="password" required placeholder="Enter your password" class="form-input" />
             </div>
-            
+
             <!-- Error Message -->
             <div id="loginError" class="error-message hidden">
                 <i class="fas fa-exclamation-circle"></i>
                 <span></span>
             </div>
-            
-            <!-- Submit Button -->
+
             <button type="submit" class="submit-btn">
                 <i class="fas fa-sign-in-alt"></i>
                 Sign In
             </button>
         </form>
-        
+
         <div class="mt-6 text-center text-xs text-gray-400">
             <p>© 2024 Tharbiyya. All rights reserved.</p>
         </div>
     </div>
-    
-    <!-- Dashboard Page -->
+
+    <!-- ======================================== -->
+    <!-- DASHBOARD PAGE                          -->
+    <!-- ======================================== -->
     <div id="dashboardPage" class="dashboard-container hidden">
+
         <!-- Header -->
         <div class="flex items-center justify-between mb-6 flex-wrap gap-3">
             <div class="user-info-card">
@@ -655,15 +679,19 @@
                 </button>
             </div>
         </div>
-        
+
         <!-- Prayer Form -->
         <form id="prayerForm">
+
             <div class="prayers-container">
-                
-                <!-- ==================== SUBH (FAJR) PRAYER ==================== -->
+
+                <!-- ========================================================== -->
+                <!-- SUBH (FAJR)                                                -->
+                <!-- ========================================================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Subh (Fajr)</div>
                     <div class="prayer-arabic">صلاة الفجر</div>
+
                     <div class="prayer-options" data-prayer="subh">
                         <button type="button" class="prayer-option" data-value="2">
                             <i class="fas fa-check-circle"></i>
@@ -673,14 +701,18 @@
                             <i class="fas fa-clock"></i>
                             <span>Qaḍā'</span>
                         </button>
+                        <button type="button" class="prayer-option" data-value="3">
+                            <i class="fas fa-users"></i>
+                            <span>Jama'ath</span>
+                        </button>
                         <button type="button" class="prayer-option" data-value="0">
                             <i class="fas fa-times-circle"></i>
                             <span>No</span>
                         </button>
                     </div>
-                    <input type="hidden" name="subh" id="subh" required>
-                    
-                    <!-- Rawatib: B-Subh (Before Subh) -->
+                    <input type="hidden" name="subh" id="subh" required />
+
+                    <!-- Rawatib: B-Subh -->
                     <div class="rawatib-section">
                         <div class="rawatib-header">
                             <i class="fas fa-star"></i>
@@ -699,15 +731,18 @@
                                     <span>No</span>
                                 </button>
                             </div>
-                            <input type="hidden" name="bSubh" id="bSubh">
+                            <input type="hidden" name="bSubh" id="bSubh" />
                         </div>
                     </div>
                 </div>
-                
-                <!-- ==================== ZUHR PRAYER ==================== -->
+
+                <!-- ========================================================== -->
+                <!-- ZUHR                                                       -->
+                <!-- ========================================================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Zuhr</div>
                     <div class="prayer-arabic">صلاة الظهر</div>
+
                     <div class="prayer-options" data-prayer="zuhr">
                         <button type="button" class="prayer-option" data-value="2">
                             <i class="fas fa-check-circle"></i>
@@ -717,14 +752,18 @@
                             <i class="fas fa-clock"></i>
                             <span>Qaḍā'</span>
                         </button>
+                        <button type="button" class="prayer-option" data-value="3">
+                            <i class="fas fa-users"></i>
+                            <span>Jama'ath</span>
+                        </button>
                         <button type="button" class="prayer-option" data-value="0">
                             <i class="fas fa-times-circle"></i>
                             <span>No</span>
                         </button>
                     </div>
-                    <input type="hidden" name="zuhr" id="zuhr" required>
-                    
-                    <!-- Rawatib: B-Zuhr (Before Zuhr) -->
+                    <input type="hidden" name="zuhr" id="zuhr" required />
+
+                    <!-- Rawatib: B-Zuhr & A-Zuhr -->
                     <div class="rawatib-section">
                         <div class="rawatib-header">
                             <i class="fas fa-star"></i>
@@ -743,10 +782,9 @@
                                     <span>No</span>
                                 </button>
                             </div>
-                            <input type="hidden" name="bZuhr" id="bZuhr">
+                            <input type="hidden" name="bZuhr" id="bZuhr" />
                         </div>
-                        
-                        <!-- Rawatib: A-Zuhr (After Zuhr) -->
+
                         <div class="rawatib-card">
                             <div class="rawatib-name">A-Zuhr (After Zuhr)</div>
                             <div class="rawatib-options" data-rawatib="aZuhr">
@@ -759,15 +797,18 @@
                                     <span>No</span>
                                 </button>
                             </div>
-                            <input type="hidden" name="aZuhr" id="aZuhr">
+                            <input type="hidden" name="aZuhr" id="aZuhr" />
                         </div>
                     </div>
                 </div>
-                
-                <!-- ==================== ASR PRAYER ==================== -->
+
+                <!-- ========================================================== -->
+                <!-- ASR                                                        -->
+                <!-- ========================================================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Asr</div>
                     <div class="prayer-arabic">صلاة العصر</div>
+
                     <div class="prayer-options" data-prayer="asr">
                         <button type="button" class="prayer-option" data-value="2">
                             <i class="fas fa-check-circle"></i>
@@ -777,14 +818,18 @@
                             <i class="fas fa-clock"></i>
                             <span>Qaḍā'</span>
                         </button>
+                        <button type="button" class="prayer-option" data-value="3">
+                            <i class="fas fa-users"></i>
+                            <span>Jama'ath</span>
+                        </button>
                         <button type="button" class="prayer-option" data-value="0">
                             <i class="fas fa-times-circle"></i>
                             <span>No</span>
                         </button>
                     </div>
-                    <input type="hidden" name="asr" id="asr" required>
-                    
-                    <!-- Rawatib: B-Asr (Before Asr) -->
+                    <input type="hidden" name="asr" id="asr" required />
+
+                    <!-- Rawatib: B-Asr -->
                     <div class="rawatib-section">
                         <div class="rawatib-header">
                             <i class="fas fa-star"></i>
@@ -803,15 +848,18 @@
                                     <span>No</span>
                                 </button>
                             </div>
-                            <input type="hidden" name="bAsr" id="bAsr">
+                            <input type="hidden" name="bAsr" id="bAsr" />
                         </div>
                     </div>
                 </div>
-                
-                <!-- ==================== MAGRIB PRAYER ==================== -->
+
+                <!-- ========================================================== -->
+                <!-- MAGRIB                                                     -->
+                <!-- ========================================================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Magrib</div>
                     <div class="prayer-arabic">صلاة المغرب</div>
+
                     <div class="prayer-options" data-prayer="magrib">
                         <button type="button" class="prayer-option" data-value="2">
                             <i class="fas fa-check-circle"></i>
@@ -821,14 +869,18 @@
                             <i class="fas fa-clock"></i>
                             <span>Qaḍā'</span>
                         </button>
+                        <button type="button" class="prayer-option" data-value="3">
+                            <i class="fas fa-users"></i>
+                            <span>Jama'ath</span>
+                        </button>
                         <button type="button" class="prayer-option" data-value="0">
                             <i class="fas fa-times-circle"></i>
                             <span>No</span>
                         </button>
                     </div>
-                    <input type="hidden" name="magrib" id="magrib" required>
-                    
-                    <!-- Rawatib: A-Magrib (After Magrib) -->
+                    <input type="hidden" name="magrib" id="magrib" required />
+
+                    <!-- Rawatib: A-Magrib -->
                     <div class="rawatib-section">
                         <div class="rawatib-header">
                             <i class="fas fa-star"></i>
@@ -847,15 +899,18 @@
                                     <span>No</span>
                                 </button>
                             </div>
-                            <input type="hidden" name="aMagrib" id="aMagrib">
+                            <input type="hidden" name="aMagrib" id="aMagrib" />
                         </div>
                     </div>
                 </div>
-                
-                <!-- ==================== ISHA PRAYER ==================== -->
+
+                <!-- ========================================================== -->
+                <!-- ISHA                                                       -->
+                <!-- ========================================================== -->
                 <div class="prayer-card">
                     <div class="prayer-title">Isha</div>
                     <div class="prayer-arabic">صلاة العشاء</div>
+
                     <div class="prayer-options" data-prayer="isha">
                         <button type="button" class="prayer-option" data-value="2">
                             <i class="fas fa-check-circle"></i>
@@ -865,14 +920,18 @@
                             <i class="fas fa-clock"></i>
                             <span>Qaḍā'</span>
                         </button>
+                        <button type="button" class="prayer-option" data-value="3">
+                            <i class="fas fa-users"></i>
+                            <span>Jama'ath</span>
+                        </button>
                         <button type="button" class="prayer-option" data-value="0">
                             <i class="fas fa-times-circle"></i>
                             <span>No</span>
                         </button>
                     </div>
-                    <input type="hidden" name="isha" id="isha" required>
-                    
-                    <!-- Rawatib: A-Isha (After Isha) -->
+                    <input type="hidden" name="isha" id="isha" required />
+
+                    <!-- Rawatib: A-Isha -->
                     <div class="rawatib-section">
                         <div class="rawatib-header">
                             <i class="fas fa-star"></i>
@@ -891,21 +950,22 @@
                                     <span>No</span>
                                 </button>
                             </div>
-                            <input type="hidden" name="aIsha" id="aIsha">
+                            <input type="hidden" name="aIsha" id="aIsha" />
                         </div>
                     </div>
                 </div>
-                
-            </div>
-            
+
+            </div><!-- /prayers-container -->
+
             <!-- Submit Button -->
             <button type="submit" id="submitPrayerBtn" class="submit-btn">
                 <i class="fas fa-save"></i>
                 Submit Today's Prayers
             </button>
+
         </form>
     </div>
-    
+
     <script src="app.js"></script>
 </body>
 </html>
